@@ -1,0 +1,306 @@
+
+introduction:
+  something is broken:
+    hubot offers to track it:
+      - rachael> the jetpack is broken
+      - hubot> maybe you found a bug on "the jetpack"? do you wan't me to track it?
+      - rachael> yes, please
+      - hubot> just say "I found a bug, <a good concise description>"
+  how do I track issues?:
+    hubot explains:
+      - rachael> @hubot how do you track issues?
+      - hubot> just say "I found a bug, <a good concise description>"
+track new issues:
+  I found ...:
+    hubot tracks it:
+      - rachael> I found a bug, jetpack is broken
+      - "hubot> nice catch @rachael!, tracked as #1"
+      -
+        brain:
+          hubotissues:
+            -
+              id: 1
+              description: jetpack is broken
+              author: rachael
+              state: pending
+
+a pending issue:
+  before each:
+    - rachael> I found a bug, jetpack is broken
+    - "hubot> nice catch @rachael!, tracked as #1"
+  I'm fixing:
+    hubot tracks that:
+      - "zhora> fixing #1"
+      - "hubot> good luck with that"
+      -
+        brain:
+          hubotissues:
+            -
+              id: 1
+              description: jetpack is broken
+              author: rachael
+              assignee: zhora
+              state: pending
+  I'm fixing that (recently mentioned issue):
+    hubot tracks that too:
+      - "zhora> fixing that"
+      - "hubot> good luck with that"
+      -
+        brain:
+          hubotissues:
+            -
+              id: 1
+              description: jetpack is broken
+              author: rachael
+              assignee: zhora
+              state: pending
+  fixed:
+    hubot asks for verification:
+      - "zhora> fixed #1"
+      - hubot> sweet!, @rachael can you verify? (#1 jetpack is broken)
+      -
+        brain:
+          hubotissues:
+            -
+              id: 1
+              description: jetpack is broken
+              author: rachael
+              assignee: zhora
+              state: fixed
+
+fixing an issue:
+  before each:
+    - rachael> I found a bug, jetpack is broken
+    - "hubot> nice catch @rachael!, tracked as #1"
+    - "zhora> fixing #1"
+    - hubot> good luck with that
+  fixing again:
+    hubot already knows that:
+      - "zhora> fixing #1"
+      - "hubot> yes, we know that"
+  someone else tries to fix:
+    hubot prevents collisions:
+      - "pris> fixing #1"
+      - "hubot> wait! @zhora is already doing that"
+  not fixing anymore:
+    hubot asks for a volunteer to continue with it:
+      - "zhora> I'm not fixing #1"
+      - "hubot> no problem, someone else will volunteer"
+  fixed:
+    hubot asks for verification:
+      - "zhora> fixed #1"
+      - hubot> sweet!, @rachael can you verify? (#1 jetpack is broken)
+    hubot tells you if someone else was fixing it:
+      - "pris> fixed #1"
+      - hubot> I thought @zhora was doing that
+      - hubot> sweet!, @rachael can you verify? (#1 jetpack is broken)
+  fixed that:
+    hubot asks for verification:
+      - "zhora> fixed that"
+      - hubot> sweet!, @rachael can you verify? (#1 jetpack is broken)
+  is a duplicate:
+    hubot will tell the author:
+      - rachael> I found a bug, jetpack is not working
+      - "hubot> nice catch @rachael!, tracked as #2"
+      - "zhora> that is a duplicate of #1"
+      - "hubot> got it, #2 is gone, added @rachael comment to #1"
+    if you don't say it, hubot will ask you of which:
+      - rachael> I found a bug, jetpack is not working
+      - "hubot> nice catch @rachael!, tracked as #2"
+      - "zhora> dup"
+      - "hubot> duplicate of which?"
+      - "zhora> of #1"
+      - "hubot> got it, #2 is gone, added @rachael comment to #1"
+    works the other way around too:
+      - rachael> I found a bug, jetpack is not working
+      - "hubot> nice catch @rachael!, tracked as #2"
+      - "zhora> #1 is a duplicate of that"
+      - "hubot> got it, #1 is gone, added @rachael comment to #2"
+    works the other way around too:
+      - rachael> I found a bug, jetpack is not working
+      - "hubot> nice catch @rachael!, tracked as #2"
+      - "zhora> #1 is a duplicate of that"
+      - "hubot> got it, #1 is gone, added @rachael comment to #2"
+  needs clarification:
+    hubot will ask the author for it:
+      - "zhora> #1 needs clarification, is it on fire?"
+      - "hubot> @rachael, can you answer that? (about jetpack is broken)"
+    hubot will ask you for a question:
+      - "zhora> that needs clarification"
+      - "hubot> what's your question?"
+      - "zhora> is it on fire?"
+      - "hubot> @rachael, can you answer that? (about jetpack is broken)"
+  adding information:
+    comment about an issue:
+      hubot will remember it:
+        - "rachael> about that, it's on fire!"
+        - "hubot> got it"
+        -
+          brain:
+            hubotissues:
+              -
+                id: 1
+                description: jetpack is broken
+                author: rachael
+                assignee: zhora
+                state: pending
+                log:
+                  - rachael> it's on fire!
+      hubot will ask for a comment:
+        - "rachael> about that"
+        - "hubot> tell me"
+        - "rachael> it's on fire!"
+        - "hubot> got it"
+        -
+          brain:
+            hubotissues:
+              -
+                id: 1
+                description: jetpack is broken
+                author: rachael
+                assignee: zhora
+                state: pending
+                log:
+                  - rachael> it's on fire!
+
+    tagging an issue:
+      hubot will add tags:
+        - "rachael> #1 is awful, critical and blocker"
+        - "hubot> #1 is now #awful, #critical and #blocker"
+        -
+          brain:
+            hubotissues:
+              -
+                id: 1
+                description: jetpack is broken
+                author: rachael
+                assignee: zhora
+                state: pending
+                tags:
+                  - awful
+                  - critical
+                  - blocker
+
+      hubot will remove tags:
+        - "rachael> #1 is awful, critical and blocker"
+        - "hubot> #1 is now #awful, #critical and #blocker"
+        - "rachael> #1 is not awful"
+        - "hubot> #1 is now #critical and #blocker"
+        - "rachael> #1 is not critical and not blocker"
+        - "hubot> #1 has no tags"
+        -
+          brain:
+            hubotissues:
+              -
+                id: 1
+                description: jetpack is broken
+                author: rachael
+                assignee: zhora
+                state: pending
+
+issue details:
+  before each:
+    - rachael> I found a bug, jetpack is broken
+    - "hubot> nice catch @rachael!, tracked as #1"
+    - "zhora> fixing #1"
+    - hubot> good luck with that
+    - rachael> I found a bug, laser gun is overheating
+    - "hubot> nice catch @rachael!, tracked as #2"
+    - rachael> and the trigger is jammed
+    - "hubot> got it"
+    - rachael> that is critical
+    - "hubot> #2 is now #critical"
+    - "zhora> about that, use grenades in the meantime"
+    - "hubot> got it"
+  asking about a pending issue getting fixed:
+    hubot has the details:
+    - "pris> 1?"
+    - "hubot> pending, #1 jetpack is broken, by @rachael, getting fixed by @zhora"
+  asking about a pending issue with tags and comments:
+    hubot has the details:
+    - "pris> 2?"
+    - "hubot> pending, #2 laser gun is overheating #critical, by @rachael\n- rachael> the trigger is jammed\n- zhora> use grenades in the meantime"
+
+a fixed issue:
+  before each:
+    - rachael> I found a bug, jetpack is broken
+    - "hubot> nice catch @rachael!, tracked as #1"
+    - "zhora> fixed that"
+    - hubot> sweet!, @rachael can you verify? (#1 jetpack is broken)
+  reject:
+    author rejects it:
+      hubot will ask for more fixing:
+        - "rachael> reject 1"
+        - "hubot> oops!, #1 is going to need more fixing @zhora"
+        -
+          brain:
+            hubotissues:
+              -
+                id: 1
+                description: jetpack is broken
+                author: rachael
+                assignee: zhora
+                state: pending
+    asignee rejects it:
+      hubot will ask for more fixing:
+        - "zhora> reject 1"
+        - "hubot> oops!, no problem, let me know when it's fixed"
+    someone else rejects it:
+      hubot will ask for more fixing:
+        - "pris> reject that"
+        - "hubot> oops!, #1 is going to need more fixing @zhora"
+
+  verify:
+    author verifies it:
+      hubot will notify the fixer:
+        - "rachael> verified 1"
+        - "hubot> great news!, @zhora good work fixing #1 jetpack is broken"
+        -
+          brain:
+            hubotissues:
+              -
+                id: 1
+                description: jetpack is broken
+                author: rachael
+                assignee: zhora
+                state: verified
+    asignee verifies it:
+      hubot only lets the author do that:
+        - "zhora> verified 1"
+        - "hubot> that's great, but I'll wait for @rachael to verify that"
+    someone else verifies it:
+      hubot only lets the author do that:
+        - "pris> verified 1"
+        - "hubot> that's great, but I'll wait for @rachael to verify that"
+
+delete:
+  before each:
+    - rachael> I found a bug, jetpack is broken
+    - "hubot> nice catch @rachael!, tracked as #1"
+  delete one issue:
+    if you're the author hubot just does it:
+    - rachael> delete that
+    - "hubot> #1 is gone"
+    -
+      brain:
+        hubotissues: []
+    otherwise it will let the author know:
+    - "pris> delete #1"
+    - "hubot> #1 is gone (jetpack is broken by @rachael)"
+
+lists:
+  before each:
+    - rachael> I found a bug, jetpack is broken
+    - "hubot> nice catch @rachael!, tracked as #1"
+    - rachael> I found a bug, laser gun is broken
+    - "hubot> nice catch @rachael!, tracked as #2"
+  pending bugs?:
+    hubot lists them:
+      - zhora> pending bugs?
+      - "hubot> == pending ==\n- #1 jetpack is broken, by @rachael\n- #2 laser gun is broken, by @rachael"
+
+notifications:
+  if pending issues are waiting:
+  if an issue is still getting fixed:
+  if an issue is waiting for clarification:
+  if an issue is waiting for verification:

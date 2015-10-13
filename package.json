@@ -1,0 +1,41 @@
+{
+  "name": "hubot-issues",
+  "version": "0.0.1",
+  "description": "hubot issue tracker",
+  "main": "./src/main",
+  "scripts": {
+    "test": "gulp test",
+    "bump": "gulp bump",
+    "watch": "gulp watch",
+    "cover": "istanbul cover --root src gulp test",
+    "cover-report": "open coverage/lcov-report/index.html",
+    "cover-publish": "istanbul cover _mocha --report lcovonly && codeclimate < coverage/lcov.info"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/benjamine/hubot-issues.git"
+  },
+  "keywords": [
+    "hubot",
+    "issue",
+    "bug",
+    "tracker"
+  ],
+  "author": "Benjamin Eidelman <beneidel@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "bulk-require": "^0.2.1",
+    "chalk": "^1.1.1",
+    "codeclimate-test-reporter": "0.0.3",
+    "coffee-script": "^1.10.0",
+    "expect.js": "~0.3.1",
+    "fiberglass": "~0.0.22",
+    "gulp": "^3.8.8",
+    "hubot-test-helper": "^1.0.0",
+    "istanbul": "^0.3.2"
+  },
+  "dependencies": {
+    "lodash": "^3.10.1",
+    "js-yaml": "^3.4.2"
+  }
+}
