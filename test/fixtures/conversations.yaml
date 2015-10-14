@@ -180,6 +180,47 @@ fixing an issue:
                   - awful
                   - critical
                   - blocker
+    tagging multiple issues:
+      hubot will tag them all:
+        - rachael> I found a bug, laser gun is broken
+        - "hubot> nice catch @rachael!, tracked as #2"
+        - rachael> I found a bug, hoverboard is out of battery
+        - "hubot> nice catch @rachael!, tracked as #3"
+        - "rachael> that and 1 are awful"
+        - "hubot> #3 and #1 are now #awful"
+        - "rachael> 2 and 3 are critical"
+        - "hubot> #2 and #3 are now #critical"
+        - "rachael> 1, 2 and 3 are important"
+        - "hubot> #1, #2 and #3 are now #important"
+        -
+          brain:
+            hubotissues:
+              -
+                id: 1
+                description: jetpack is broken
+                author: rachael
+                assignee: zhora
+                state: pending
+                tags:
+                  - awful
+                  - important
+              -
+                id: 2
+                description: laser gun is broken
+                author: rachael
+                state: pending
+                tags:
+                  - critical
+                  - important
+              -
+                id: 3
+                description: hoverboard is out of battery
+                author: rachael
+                state: pending
+                tags:
+                  - awful
+                  - critical
+                  - important
 
       hubot will remove tags:
         - "rachael> #1 is awful, critical and blocker"
@@ -287,17 +328,77 @@ delete:
     otherwise it will let the author know:
     - "pris> delete #1"
     - "hubot> #1 is gone (jetpack is broken by @rachael)"
+  delete verified issues:
+    hubot deletes them all:
+    - rachael> I found a bug, laser gun is jammed
+    - "hubot> nice catch @rachael!, tracked as #2"
+    - rachael> I found a bug, hoverboard is out of battery
+    - "hubot> nice catch @rachael!, tracked as #3"
+    - zhora> fixed 1
+    - hubot> sweet!, @rachael can you verify? (#1 jetpack is broken)
+    - rachael> verified that
+    - "hubot> great news!, @zhora good work fixing #1 jetpack is broken"
+    - zhora> fixed 3
+    - hubot> sweet!, @rachael can you verify? (#3 hoverboard is out of battery)
+    - rachael> verified that
+    - "hubot> great news!, @zhora good work fixing #3 hoverboard is out of battery"
+    - rachael> delete verified issues
+    - hubot> 2 issue(s) deleted
 
 lists:
   before each:
+    # add some bugs
     - rachael> I found a bug, jetpack is broken
     - "hubot> nice catch @rachael!, tracked as #1"
     - rachael> I found a bug, laser gun is broken
     - "hubot> nice catch @rachael!, tracked as #2"
+    - rachael> I found a bug, hoverboard is out of battery
+    - "hubot> nice catch @rachael!, tracked as #3"
+    - rachael> I found a bug, flux capacitor is burnt
+    - "hubot> nice catch @rachael!, tracked as #4"
+    # diverse states
+    - zhora> fixing 2
+    - hubot> good luck with that
+    - pris> I did 3
+    - "hubot> sweet!, @rachael can you verify? (#3 hoverboard is out of battery)"
+    - zhora> 4 is fixed
+    - "hubot> sweet!, @rachael can you verify? (#4 flux capacitor is burnt)"
+    - rachael> that's verified
+    - "hubot> great news!, @zhora good work fixing #4 flux capacitor is burnt"
   pending bugs?:
-    hubot lists them:
+    hubot lists pending bugs:
       - zhora> pending bugs?
-      - "hubot> == pending ==\n- #1 jetpack is broken, by @rachael\n- #2 laser gun is broken, by @rachael"
+      - |
+        hubot> == pending ==
+        - #1 jetpack is broken, by @rachael
+        - #2 laser gun is broken, by @rachael, getting fixed by @zhora
+  bugs?:
+    hubot lists pending and fixed bugs:
+      - zhora> bugs?
+      - |
+        hubot> == pending ==
+        - #1 jetpack is broken, by @rachael
+        - #2 laser gun is broken, by @rachael, getting fixed by @zhora
+        == fixed ==
+        - #3 hoverboard is out of battery, by @rachael, fixed by @pris
+  verified bugs?:
+    hubot lists verified bugs:
+      - zhora> verified bugs?
+      - |
+        hubot> == verified ==
+        - #4 flux capacitor is burnt, by @rachael, fixed by @zhora
+  by tag:
+    hubot will get them:
+      - rachael> 2 and 3 are important
+      - "hubot> #2 and #3 are now #important"
+      - rachael> 3 is fun
+      - "hubot> #3 is now #important and #fun"
+      - zhora> important bugs?
+      - |
+        hubot> == pending ==
+        - #2 laser gun is broken #important, by @rachael, getting fixed by @zhora
+        == fixed ==
+        - #3 hoverboard is out of battery #important and #fun, by @rachael, fixed by @pris
 
 notifications:
   if pending issues are waiting:

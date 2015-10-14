@@ -110,4 +110,32 @@ BrainRepo.prototype.filter = readOnly(function(filter) {
   return this.data.filter(filter);
 });
 
+BrainRepo.prototype.deleteAll = unitOfWork(function(filter) {
+  if (typeof filter !== 'function') {
+    if (typeof filter !== 'object') {
+      throw new Error('invalid filter, expected function or object');
+    }
+    filter = function(entity) {
+      for (var name in filter) {
+        if (filter[name] !== entity[name]) {
+          return false;
+        }
+      }
+      return true;
+    };
+  }
+  var count = 0;
+  for (var i = this.data.length - 1; i >= 0; i--) {
+    var existingEntity = this.data[i];
+    if (filter(existingEntity)) {
+      this.data.splice(i, 1);
+      i--;
+      count++;
+    }
+  }
+  return {
+    count: count
+  };
+});
+
 module.exports = BrainRepo;

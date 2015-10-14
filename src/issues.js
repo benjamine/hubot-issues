@@ -85,9 +85,18 @@ module.exports = function(robot) {
   chatter.hear([
     /^(?:any )?blockers\?$/i,
     /^what's (?:broken|to be fixed|pending)\??$/i,
-    /^(?:list|any|is there any|do we have|give me|which are)?(?: the|our)? ?(?:(.+)? )?(bugs|issues)\??$/i
+    /^(?:list|any|is there any|do we have|give me|which are)?(?: the| our)? ?(?:(.+)? )?(?:bugs|issues)\??$/i
   ], function(res, type) {
-    type = type.trim().toLowerCase();
+    type = (type || '').trim().toLowerCase();
+    if (type === 'all') {
+      type = '';
+    }
+
+    if (/delete/.test(type)) {
+      // this is a delete command
+      return;
+    }
+
     var issues = repo.filter(function(issue){
       if (type) {
         if (issue.state === type) {
@@ -97,7 +106,7 @@ module.exports = function(robot) {
           return true;
         }
       } else {
-        return issue.type !== 'verified';
+        return issue.state !== 'verified';
       }
     });
 
@@ -410,6 +419,7 @@ module.exports = function(robot) {
   }
 
   chatter.hear([
+    /^((?:(?:and +)?(?:\#?\d+|that|it)(?:[, ]+)?){2,20}) are ([\w\d \-',.#]+)?$/i,
     /^\#?(\d+|that|it) is ([\w\d \-',.#]+)?$/i,
   ], function(res, id, tagString) {
 
@@ -418,53 +428,84 @@ module.exports = function(robot) {
       return;
     }
 
-    var context;
-    if (['that', 'it'].indexOf(id.toLowerCase()) >= 0) {
-      context = this.getRoomContext(res, 'issueid');
-      if (context && context.value) {
-        id = context.value;
-      } else {
-        this.send(res, 'issue not found in context', { ref: id });
-        return;
-      }
+    id = id.toLowerCase().trim();
+    var ids;
+    if (/[ ,]/.test(id)) {
+      // multiple ids
+      ids = id.split(/[ ,]+/g).map(function(anId) {
+        return anId.replace(/[ ,\#]+/g, '');
+      }).filter(function(anId) {
+        return anId !== 'and';
+      });
+    } else {
+      ids = [id];
     }
 
-    var issue = repo.get(+id);
-    if (!issue) {
-      this.send(res, 'issue not found', { id: id });
-      return;
-    }
-    this.setRoomContext(res, 'issueid', issue.id);
-    var tagsChanged = false;
-    tags.forEach(function(tag){
-      if (/^not /.test(tag)) {
-        for (var i = 0; i < issue.tags.length; i++) {
-          if ('not ' + issue.tags[i] === tag) {
-            issue.tags.splice(i, 1);
-            i--;
+    function applyTags(tags, issue) {
+      var tagsChanged = false;
+      tags.forEach(function(tag) {
+        if (/^not /.test(tag)) {
+          for (var i = 0; i < issue.tags.length; i++) {
+            if ('not ' + issue.tags[i] === tag) {
+              issue.tags.splice(i, 1);
+              i--;
+              tagsChanged = true;
+            }
+          }
+          if (issue.tags.length < 1) {
+            delete issue.tags;
+          }
+        } else {
+          issue.tags = issue.tags || [];
+          if (issue.tags.indexOf(tag) < 0) {
+            issue.tags.push(tag);
             tagsChanged = true;
           }
         }
-        if (issue.tags.length < 1) {
-          delete issue.tags;
-        }
-      } else {
-        issue.tags = issue.tags || [];
-        issue.tags.push(tag);
-        tagsChanged = true;
-      }
-    });
-    if (tagsChanged) {
-      repo.update(issue);
+      });
+      return tagsChanged;
     }
-    if (issue.tags && issue.tags.length) {
-      this.send(res, 'issue tagged', { issue: issue, tags: stringifyTags(issue.tags) });
-    } else {
-      this.send(res, 'issue has no tags', { issue: issue });
+
+    var context;
+    for (var i = 0; i < ids.length; i++) {
+      if (['that', 'it'].indexOf(ids[i].toLowerCase()) >= 0) {
+        context = this.getRoomContext(res, 'issueid');
+        if (context && context.value) {
+          ids[i] = context.value;
+        } else {
+          this.send(res, 'issue not found in context', { ref: ids[i] });
+          return;
+        }
+      }
+
+      var issue = repo.get(+ids[i]);
+      if (!issue) {
+        this.send(res, 'issue not found', { id: ids[i] });
+        return;
+      }
+      if (ids.length < 2) {
+        this.setRoomContext(res, 'issueid', issue.id);
+      }
+
+      var tagsChanged = applyTags(tags, issue);
+      if (tagsChanged) {
+        repo.update(issue);
+      }
+      if (ids.length < 2) {
+        if (issue.tags && issue.tags.length) {
+          this.send(res, 'issue tagged', { issue: issue, tags: stringifyTags(issue.tags) });
+        } else {
+          this.send(res, 'issue has no tags', { issue: issue });
+        }
+      }
+    }
+
+    if (ids.length > 1) {
+      this.send(res, 'issues tagged', { issues: stringifyTags(ids), tags: stringifyTags(tags) });
     }
   });
 
-  /* deleting */
+  /* duplicates */
 
   chatter.hear([
     /^dup(?:licate)?$/i,
@@ -687,9 +728,14 @@ module.exports = function(robot) {
       'issue deleted by author' : 'issue deleted', { issue: issue });
   });
 
-  /* follow up */
+  chatter.hear([
+    /^(?:delete|kill) verified (?:issues|bugs)$/i,
+  ], function(res) {
+    var count = repo.deleteAll({ state: 'verified' }).count;
+    this.send(res, 'issues deleted', { count: count });
+  });
 
-  /* stats */
+  /* follow up */
 
 
 };

@@ -1,6 +1,6 @@
 {
   "name": "hubot-issues",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "hubot issue tracker",
   "main": "./src/main",
   "scripts": {

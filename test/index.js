@@ -58,6 +58,8 @@ describe('hubotIssues', function(){
 
   function hubotShouldSay(text) {
     var self = this;
+    // unescape chars
+    text = text.replace(/\\n\s*/gm, '\n');
     return function() {
       return new Promise(function(resolve, reject) {
         var startTime = new Date().getTime();

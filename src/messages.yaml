@@ -42,6 +42,8 @@ only author can verify:
   - "that's great, but I'll wait for @<%= issue.author %> to verify that"
 issue deleted:
   - "#<%= issue.id %> is gone (<%= issue.description %> by @<%= issue.author %>)"
+issues deleted:
+  - "<%= count %> issue(s) deleted"
 issue deleted by author:
   - "#<%= issue.id %> is gone"
 issue duplicate deleted:
@@ -60,17 +62,19 @@ comment added:
   - "got it"
 comment, what?:
   - "tell me"
+issues tagged:
+  - "<%= issues %> are now <%= tags %>"
 issue tagged:
   - "#<%= issue.id %> is now <%= tags %>"
 issue has no tags:
   - "#<%= issue.id %> has no tags"
 issue details:
-  - "<%= issue.state %>, #<%= issue.id %> <%= issue.description %><% if (tags) {%> <%= tags %><%}%>, by @<%= issue.author %><% if (issue.assignee) {%>, getting fixed by @<%= issue.assignee%><%}%>"
+  - "<%= issue.state %>, #<%= issue.id %> <%= issue.description %><% if (tags) {%> <%= tags %><%}%>, by @<%= issue.author %><% if (issue.assignee) {%>, <% if (issue.state==='pending') {%>getting <%}%>fixed by @<%= issue.assignee%><%}%>"
 issue details log entry:
   - "- <%= text %>"
 list empty:
-  - "no <%= (type && (type + ' ') || '') %> issues"
+  - "no <%= (type && (type + ' ') || '') %>issues"
 list group:
   - "== <%= group.name %> =="
 list issue:
-  - "- #<%= issue.id %> <%= issue.description %><% if (tags) {%> <%= tags %><%}%>, by @<%= issue.author + '\n' %>"
+  - "- #<%= issue.id %> <%= issue.description %><% if (tags) {%> <%= tags %><%}%>, by @<%= issue.author %><% if (issue.assignee) {%>, <% if (issue.state==='pending') {%>getting <%}%>fixed by @<%= issue.assignee%><%}%>"
