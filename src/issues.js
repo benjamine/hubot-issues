@@ -82,38 +82,7 @@ module.exports = function(robot) {
 
   /* listing */
 
-  chatter.hear([
-    /^(?:any )?blockers\?$/i,
-    /^what's (?:broken|to be fixed|pending)\??$/i,
-    /^(?:list|any|is there any|do we have|give me|which are)?(?: the| our)? ?(?:(.+)? )?(?:bugs|issues)\??$/i
-  ], function(res, type) {
-    type = (type || '').trim().toLowerCase();
-    if (type === 'all') {
-      type = '';
-    }
-
-    if (/delete/.test(type)) {
-      // this is a delete command
-      return;
-    }
-
-    var issues = repo.filter(function(issue){
-      if (type) {
-        if (issue.state === type) {
-          return true;
-        }
-        if (issue.tags && issue.tags.indexOf(type) >= 0) {
-          return true;
-        }
-      } else {
-        return issue.state !== 'verified';
-      }
-    });
-
-    if (issues.length < 1) {
-      this.send(res, 'list empty', { type: type });
-      return;
-    }
+  function formatList(res, issues) {
     var issuesByState = _.groupBy(issues, 'state');
     var list = [];
     var states = Object.keys(issuesByState);
@@ -150,7 +119,70 @@ module.exports = function(robot) {
         }));
       });
     });
-    res.send(list.join('\n'));
+    return list.join('\n');
+  }
+
+  chatter.hear([
+    /^(?:any )?blockers\?$/i,
+    /^what's (?:broken|to be fixed|pending)\??$/i,
+    /^(?:list|any|is there any|do we have|give me|which are)?(?: the| our)? ?(?:(.+)? )?(?:bugs|issues)\??$/i
+  ], function(res, type) {
+    type = (type || '').trim().toLowerCase();
+    if (type === 'all') {
+      type = '';
+    }
+
+    if (/delete/.test(type)) {
+      // this is a delete command
+      return;
+    }
+
+    var issues = repo.filter(function(issue){
+      if (type) {
+        if (issue.state === type) {
+          return true;
+        }
+        if (issue.tags && issue.tags.indexOf(type) >= 0) {
+          return true;
+        }
+      } else {
+        return issue.state !== 'verified';
+      }
+    });
+
+    if (issues.length < 1) {
+      this.send(res, 'list empty', { type: type });
+      return;
+    }
+    res.send(formatList(res, issues));
+  });
+
+  chatter.hear([
+    /^(?:what|which)(?: issues?| bugs?) can I (?:fix|do|work on)(?: next| now)?\??$/i,
+    /^(?:(?:what|which) are )?my (?:issues|bugs)\??$/i,
+  ], function(res) {
+
+    var user = res.message.user.name;
+    var issues = repo.filter(function(issue){
+      if (issue.author === user && issue.state !== 'fixed') {
+        return true;
+      }
+      if (issue.asignee === user && issue.state === 'pending') {
+        return true;
+      }
+      return false;
+    });
+    if (issues.length < 1) {
+      issues = repo.filter(function(issue) {
+        return issue.state === 'pending' && !issue.asignee;
+      });
+    }
+
+    if (issues.length < 1) {
+      this.send(res, 'your list empty');
+      return;
+    }
+    res.send(formatList(res, issues));
   });
 
   /* assign */
@@ -253,10 +285,19 @@ module.exports = function(robot) {
     if (issue.assignee && issue.assignee !== res.message.user.name) {
       this.send(res, 'issue was being fixed by someone else', { issue: issue });
     }
+
+    this.setRoomContext(res, 'issueid', issue.id);
     issue.assignee = res.message.user.name;
+    repo.update(issue);
+    if (issue.assignee === issue.author) {
+      // autofix, consider it verified
+      issue.state = 'verified';
+      repo.update(issue);
+      this.send(res, 'issue fixed by author', { issue: issue });
+      return;
+    }
     issue.state = 'fixed';
     repo.update(issue);
-    this.setRoomContext(res, 'issueid', issue.id);
     this.send(res, 'issue fixed', { issue: issue });
   });
 
@@ -735,7 +776,7 @@ module.exports = function(robot) {
     this.send(res, 'issues deleted', { count: count });
   });
 
-  /* follow up */
+  /* notifications */
 
 
 };

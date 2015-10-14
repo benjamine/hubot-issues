@@ -98,6 +98,20 @@ fixing an issue:
     hubot asks for verification:
       - "zhora> fixed that"
       - hubot> sweet!, @rachael can you verify? (#1 jetpack is broken)
+  fixed it myself:
+    hubot considers it verified:
+      - "rachael> I fixed that"
+      - hubot> I thought @zhora was doing that
+      - hubot> sweet!, you did it yourself
+      -
+        brain:
+          hubotissues:
+            -
+              id: 1
+              description: jetpack is broken
+              author: rachael
+              assignee: rachael
+              state: verified
   is a duplicate:
     hubot will tell the author:
       - rachael> I found a bug, jetpack is not working
@@ -399,6 +413,23 @@ lists:
         - #2 laser gun is broken #important, by @rachael, getting fixed by @zhora
         == fixed ==
         - #3 hoverboard is out of battery #important and #fun, by @rachael, fixed by @pris
+
+my issues:
+  has issues I have to verify:
+    - rachael> my issues?
+      - |
+        hubot> == fixed ==
+        - #3 hoverboard is out of battery, by @rachael, fixed by @pris
+  has issues I'm fixing:
+    - zhora> what can I fix next?
+      - |
+        hubot> == pending ==
+        - #2 laser gun is broken #important, by @rachael, getting fixed by @zhora
+  otherwise it has issues I could fix:
+    - pris> what can I do?
+      - |
+        hubot>== pending ==
+        - #1 jetpack is broken, by @rachael
 
 notifications:
   if pending issues are waiting:

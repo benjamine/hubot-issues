@@ -32,6 +32,8 @@ cannot verify, issue not fixed:
   - "#<%= issue.id %> is not fixed, it's <%= issue.state %>"
 issue fixed:
   - "sweet!, @<%= issue.author %> can you verify? (#<%= issue.id %> <%= issue.description %>)"
+issue fixed by author:
+  - "sweet!, you did it yourself"
 rejected fix:
   - "oops!, #<%= issue.id %> is going to need more fixing @<%= issue.assignee %>"
 rejected your fix:
@@ -74,6 +76,8 @@ issue details log entry:
   - "- <%= text %>"
 list empty:
   - "no <%= (type && (type + ' ') || '') %>issues"
+your list empty:
+  - "sorry, I have nothing for you"
 list group:
   - "== <%= group.name %> =="
 list issue:
