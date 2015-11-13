@@ -70,10 +70,12 @@ module.exports = function(robot) {
 
   /* creating */
 
-  chatter.hear(/I found a bug(?:[, ]+)?([\s\S]+)$/i, function(res, description) {
+  chatter.hear(/(?:I )?found a bug(?:[, ]+)?([\s\S]+)$/i, function(res, description) {
     var issue = repo.create({
       description: description,
       author: res.message.user.name,
+      createdAt: currentTime(),
+      lastMentionAt: currentTime(),
       state: 'pending'
     });
     this.setRoomContext(res, 'issueid', issue.id);
@@ -167,14 +169,14 @@ module.exports = function(robot) {
       if (issue.author === user && issue.state !== 'fixed') {
         return true;
       }
-      if (issue.asignee === user && issue.state === 'pending') {
+      if (issue.assignee === user && issue.state === 'pending') {
         return true;
       }
       return false;
     });
     if (issues.length < 1) {
       issues = repo.filter(function(issue) {
-        return issue.state === 'pending' && !issue.asignee;
+        return issue.state === 'pending' && !issue.assignee;
       });
     }
 
@@ -221,6 +223,7 @@ module.exports = function(robot) {
       return;
     }
     issue.assignee = res.message.user.name;
+    issue.lastMentionAt = currentTime();
     repo.update(issue);
     this.setRoomContext(res, 'issueid', issue.id);
     this.send(res, 'issue assigned', { issue: issue });
@@ -288,17 +291,23 @@ module.exports = function(robot) {
 
     this.setRoomContext(res, 'issueid', issue.id);
     issue.assignee = res.message.user.name;
+    issue.lastMentionAt = currentTime();
     repo.update(issue);
     if (issue.assignee === issue.author) {
       // autofix, consider it verified
       issue.state = 'verified';
+      issue.stateChangedAt = currentTime();
       repo.update(issue);
       this.send(res, 'issue fixed by author', { issue: issue });
       return;
     }
     issue.state = 'fixed';
+    issue.stateChangedAt = currentTime();
     repo.update(issue);
-    this.send(res, 'issue fixed', { issue: issue });
+    var pendingIssues = repo.filter(function(issue) {
+      return issue.state === 'pending';
+    });
+    this.send(res, 'issue fixed', { issue: issue, pendingIssues: pendingIssues });
   });
 
   /* clarification */
@@ -344,17 +353,23 @@ module.exports = function(robot) {
     /^([\s\S]+)\?$/i,
   ], function(res, question) {
 
-    var context = this.getReplyContext(res, 'needsClarificationId');
+    var context;
+    var issue;
+
+    context = this.getReplyContext(res, 'needsClarificationId');
     if (context && context.value) {
-      var issue = repo.get(context.value);
+      issue = repo.get(context.value);
       if (issue) {
         issue.log = issue.log || [];
         issue.log.push(res.message.user.name + '> ' + question);
+        issue.lastMentionAt = currentTime();
         repo.update(issue);
         this.send(res, 'issue needs clarification, can author answer?', { issue: issue });
       }
       this.setReplyContext(res, 'needsClarificationId', null);
+      return;
     }
+
   });
 
   /* commenting */
@@ -394,6 +409,7 @@ module.exports = function(robot) {
     if (comment && comment.trim()) {
       issue.log = issue.log || [];
       issue.log.push(res.message.user.name + '> ' + comment);
+      issue.lastMentionAt = currentTime();
       repo.update(issue);
       this.send(res, 'comment added', { issue: issue, comment: comment });
     } else {
@@ -410,7 +426,25 @@ module.exports = function(robot) {
       /^about \#?(\d+|that|it)(?:[, ]+)?([\s\S]+)?$/i.test(res.match[0])) {
       return;
     }
-    var context = this.getReplyContext(res, 'addingCommentId');
+
+    var context;
+    var issue;
+
+    context = this.getReplyContext(res, 'rejectReasonForId');
+    if (context && context.value) {
+      issue = repo.get(context.value);
+      if (issue) {
+        issue.log = issue.log || [];
+        issue.log.push(res.message.user.name + '> ' + comment);
+        issue.lastMentionAt = currentTime();
+        repo.update(issue);
+        this.send(res, 'rejected fix, got reason', { issue: issue });
+      }
+      this.setReplyContext(res, 'needsClarificationId', null);
+      return;
+    }
+
+    context = this.getReplyContext(res, 'addingCommentId');
     if (!context || !context.value) {
       return;
     }
@@ -418,10 +452,11 @@ module.exports = function(robot) {
       this.setReplyContext(res, 'addingCommentId', null);
       return;
     }
-    var issue = repo.get(context.value);
+    issue = repo.get(context.value);
     if (issue) {
       issue.log = issue.log || [];
       issue.log.push(res.message.user.name + '> ' + comment);
+      issue.lastMentionAt = currentTime();
       repo.update(issue);
       this.send(res, 'comment added', { issue: issue, comment: comment });
     }
@@ -530,6 +565,7 @@ module.exports = function(robot) {
 
       var tagsChanged = applyTags(tags, issue);
       if (tagsChanged) {
+        issue.lastMentionAt = currentTime();
         repo.update(issue);
       }
       if (ids.length < 2) {
@@ -628,6 +664,7 @@ module.exports = function(robot) {
 
     issue.log = issue.log || [];
     issue.log.push(duplicate.author + '> ' + duplicate.description + ' (ex #' + duplicate.id + ')');
+    issue.lastMentionAt = currentTime();
     repo.update(issue);
     repo.delete(duplicate);
 
@@ -668,15 +705,17 @@ module.exports = function(robot) {
         output.push(chatter.renderMessage(res, 'issue details log entry', { issue: issue, text: text }));
       });
     }
+    issue.lastMentionAt = currentTime();
+    repo.update(issue);
     res.send(output.join('\n'));
   });
 
   /* reject */
 
   chatter.hear([
-    /\#?(\d+|that|it)(?:'s| is)?(?:not fixed|not done|not ok|not solved|not gone|rejected)$/i,
-    /(?:I(?:'ve| have) )?(?:reject(?:ed)?) \#?(\d+|that|it)$/i,
-  ], function(res, id) {
+    /\#?(\d+|that|it)(?:'s| is)?(?:not fixed|not done|not ok|not solved|not gone|rejected)(?:\s*,\s*)?([\s\S]*)$/i,
+    /(?:I(?:'ve| have) )?(?:reject(?:ed)?) \#?(\d+|that|it)(?:\s*,\s*)?([\s\S]*)$/i,
+  ], function(res, id, reason) {
 
     if (['that', 'it'].indexOf(id.toLowerCase()) >= 0) {
       var context = this.getRoomContext(res, 'issueid');
@@ -699,11 +738,21 @@ module.exports = function(robot) {
       return;
     }
     issue.state = 'pending';
+    issue.stateChangedAt = currentTime();
+    issue.lastMentionAt = currentTime();
+    if (reason) {
+      issue.log = issue.log || [];
+      issue.log.push(res.message.user.name + '> ' + reason);
+    }
     repo.update(issue);
     if (issue.assignee && issue.assignee === res.message.user.name) {
-      this.send(res, 'rejected your fix', { issue: issue });
+      this.send(res, 'rejected your fix', { issue: issue, reason: reason });
     } else {
-      this.send(res, 'rejected fix', { issue: issue });
+      this.send(res, reason ? 'rejected fix' : 'rejected fix, no reason',
+        { issue: issue, reason: reason });
+      if (!reason) {
+        this.setReplyContext(res, 'rejectReasonForId', issue.id);
+      }
     }
   });
 
@@ -738,6 +787,8 @@ module.exports = function(robot) {
       return;
     }
     issue.state = 'verified';
+    issue.stateChangedAt = currentTime();
+    issue.lastMentionAt = currentTime();
     repo.update(issue);
     this.send(res, 'verified fix', { issue: issue });
   });
@@ -778,5 +829,85 @@ module.exports = function(robot) {
 
   /* notifications */
 
+  chatter.hear([
+    /^.*$/i,
+  ], function(res) {
+    // TODO: maybe use _.throttle
+
+    // TODO: remove this if block
+    if (hoursSince(new Date()) < 24) {
+      return;
+    }
+    var user = res.message.user.name;
+    var issues = repo.filter(function(issue){
+      if (issue.state === 'verified') {
+        return;
+      }
+      var hoursSinceLastMention = hoursSince(issue.lastMentionAt);
+      if (issue.state === 'fixed' && issue.author === user && hoursSinceLastMention > 4) {
+        return true;
+      }
+      if (issue.state === 'pending' && issue.assignee === user && hoursSinceLastMention > 8) {
+        return true;
+      }
+    });
+    var personalIssues = issues && issues.length;
+    if (!personalIssues) {
+      issues = repo.filter(function(issue){
+        // issues that have been pending for a long time,
+        var hoursSinceLastMention = hoursSince(issue.lastMentionAt);
+        return issue.state === 'pending' && !issue.assignee && hoursSinceLastMention > 22;
+      });
+    }
+    if (!issues.length) {
+      return;
+    }
+
+    if (issues.length === 1) {
+      this.setRoomContext(res, 'issueid', issues[0].id);
+    }
+
+    issues.forEach(function(issue) {
+      issue.lastMentionAt = currentTime();
+      repo.update(issue);
+    });
+    if (personalIssues) {
+      var issuesList = stringifyTags(issues.map(function(issue) {
+        return issue.id.toString();
+      }));
+      this.send(res, issues.length === 1 ?
+        'issue waiting for your ' + (issues[0].state === 'fixed' ? 'verification' : 'fix') :
+        'issues waiting for you', {
+          issue: issues[0],
+          issues: issues,
+          issuesList: issuesList,
+          pending: issues.filter(function(issue) {
+            return issue.state === 'pending';
+          }),
+          fixed: issues.filter(function(issue) {
+            return issue.state === 'fixed';
+          })
+        }
+      );
+    } else {
+      this.send(res, issues.length === 1 ? 'pending issue waiting' : 'pending issues waiting',
+        { issues: issues });
+    }
+  });
+
+  function currentTime() {
+    // time shift used when unit testing
+    var timeShift = robot.brain.get('timeShift') || 0;
+    return new Date().getTime() + timeShift;
+  }
+
+  function timeSince(date) {
+    var time = typeof date === 'number' ? date : date.getTime();
+    return currentTime() - time;
+  }
+
+  function hoursSince(date) {
+    return timeSince(date) / 1000 / 3600;
+  }
 
 };

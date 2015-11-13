@@ -57,7 +57,7 @@ a pending issue:
   fixed:
     hubot asks for verification:
       - "zhora> fixed #1"
-      - hubot> sweet!, @rachael can you verify? (#1 jetpack is broken)
+      - hubot> sweet, that was the last one!. @rachael can you verify? (#1 jetpack is broken)
       -
         brain:
           hubotissues:
@@ -89,15 +89,15 @@ fixing an issue:
   fixed:
     hubot asks for verification:
       - "zhora> fixed #1"
-      - hubot> sweet!, @rachael can you verify? (#1 jetpack is broken)
+      - hubot> sweet, that was the last one!. @rachael can you verify? (#1 jetpack is broken)
     hubot tells you if someone else was fixing it:
       - "pris> fixed #1"
       - hubot> I thought @zhora was doing that
-      - hubot> sweet!, @rachael can you verify? (#1 jetpack is broken)
+      - hubot> sweet, that was the last one!. @rachael can you verify? (#1 jetpack is broken)
   fixed that:
     hubot asks for verification:
       - "zhora> fixed that"
-      - hubot> sweet!, @rachael can you verify? (#1 jetpack is broken)
+      - hubot> sweet, that was the last one!. @rachael can you verify? (#1 jetpack is broken)
   fixed it myself:
     hubot considers it verified:
       - "rachael> I fixed that"
@@ -281,11 +281,28 @@ a fixed issue:
     - rachael> I found a bug, jetpack is broken
     - "hubot> nice catch @rachael!, tracked as #1"
     - "zhora> fixed that"
-    - hubot> sweet!, @rachael can you verify? (#1 jetpack is broken)
+    - hubot> sweet, that was the last one!. @rachael can you verify? (#1 jetpack is broken)
   reject:
-    author rejects it:
-      hubot will ask for more fixing:
+    author rejects it with no explanation:
+      hubot will ask for an explanation:
         - "rachael> reject 1"
+        - "hubot> oops!, @rachael can you give your reason for rejecting?"
+        - "rachael> it doesn't work under the water"
+        - "hubot> got it, #1 is going to need more fixing @zhora"
+        -
+          brain:
+            hubotissues:
+              -
+                id: 1
+                description: jetpack is broken
+                author: rachael
+                assignee: zhora
+                state: pending
+                log:
+                  - rachael> it doesn't work under the water
+    author rejects it with explanation:
+      hubot will ask for more fixing:
+        - "rachael> reject 1, it doesn't work under the water"
         - "hubot> oops!, #1 is going to need more fixing @zhora"
         -
           brain:
@@ -296,14 +313,27 @@ a fixed issue:
                 author: rachael
                 assignee: zhora
                 state: pending
-    asignee rejects it:
+                log:
+                  - rachael> it doesn't work under the water
+    assignee rejects it:
       hubot will ask for more fixing:
         - "zhora> reject 1"
         - "hubot> oops!, no problem, let me know when it's fixed"
     someone else rejects it:
       hubot will ask for more fixing:
-        - "pris> reject that"
+        - "pris> reject that, the jetpack is out of fuel"
         - "hubot> oops!, #1 is going to need more fixing @zhora"
+        -
+          brain:
+            hubotissues:
+              -
+                id: 1
+                description: jetpack is broken
+                author: rachael
+                assignee: zhora
+                state: pending
+                log:
+                  - pris> the jetpack is out of fuel
 
   verify:
     author verifies it:
@@ -319,7 +349,7 @@ a fixed issue:
                 author: rachael
                 assignee: zhora
                 state: verified
-    asignee verifies it:
+    assignee verifies it:
       hubot only lets the author do that:
         - "zhora> verified 1"
         - "hubot> that's great, but I'll wait for @rachael to verify that"
@@ -349,11 +379,11 @@ delete:
     - rachael> I found a bug, hoverboard is out of battery
     - "hubot> nice catch @rachael!, tracked as #3"
     - zhora> fixed 1
-    - hubot> sweet!, @rachael can you verify? (#1 jetpack is broken)
+    - hubot> sweet, only 2 more to go!. @rachael can you verify? (#1 jetpack is broken)
     - rachael> verified that
     - "hubot> great news!, @zhora good work fixing #1 jetpack is broken"
     - zhora> fixed 3
-    - hubot> sweet!, @rachael can you verify? (#3 hoverboard is out of battery)
+    - hubot> sweet, only 1 more to go!. @rachael can you verify? (#3 hoverboard is out of battery)
     - rachael> verified that
     - "hubot> great news!, @zhora good work fixing #3 hoverboard is out of battery"
     - rachael> delete verified issues
@@ -374,9 +404,9 @@ lists:
     - zhora> fixing 2
     - hubot> good luck with that
     - pris> I did 3
-    - "hubot> sweet!, @rachael can you verify? (#3 hoverboard is out of battery)"
+    - "hubot> sweet, only 3 more to go!. @rachael can you verify? (#3 hoverboard is out of battery)"
     - zhora> 4 is fixed
-    - "hubot> sweet!, @rachael can you verify? (#4 flux capacitor is burnt)"
+    - "hubot> sweet, only 2 more to go!. @rachael can you verify? (#4 flux capacitor is burnt)"
     - rachael> that's verified
     - "hubot> great news!, @zhora good work fixing #4 flux capacitor is burnt"
   pending bugs?:
@@ -433,6 +463,74 @@ my issues:
 
 notifications:
   if pending issues are waiting:
+    before each:
+      - rachael> I found a bug, jetpack is broken
+      - "hubot> nice catch @rachael!, tracked as #1"
+      - rachael> I found a bug, laser gun is broken
+      - "hubot> nice catch @rachael!, tracked as #2"
+      - rachael> I found a bug, hoverboard is out of battery
+      - "hubot> nice catch @rachael!, tracked as #3"
+      - rachael> I found a bug, flux capacitor is burnt
+      - "hubot> nice catch @rachael!, tracked as #4"
+    hubot will complain 2 days later:
+      - 2 days later
+      - pris> good morning!
+      - hubot> just a reminder, 4 pending issues are waiting for volunteers
+    it won't complain too often:
+      - 2 days later
+      - pris> good morning!
+      - hubot> just a reminder, 4 pending issues are waiting for volunteers
+      - 14 hours later
+      - pris> good afternoon!
+      - 14 hours later
+      - pris> good evening!
+      - hubot> just a reminder, 4 pending issues are waiting for volunteers
   if an issue is still getting fixed:
+    before each:
+      - rachael> I found a bug, jetpack is broken
+      - "hubot> nice catch @rachael!, tracked as #1"
+      - zhora> I'll fix that
+      - hubot> good luck with that
+    hubot will offer help:
+      - 110 hours later
+      - pris> hello!
+      - zhora> hello!
+      - "hubot> @zhora are you still working on #1? can we help you?"
+  if an issue is still waiting for verification:
+    before each:
+      - rachael> I found a bug, jetpack is broken
+      - "hubot> nice catch @rachael!, tracked as #1"
+      - zhora> fixed that
+      - hubot> sweet, that was the last one!. @rachael can you verify? (#1 jetpack is broken)
+    hubot will remind the issue author:
+      - 110 hours later
+      - pris> hello!
+      - zhora> hello!
+      - rachael> what's up?
+      - "hubot> @rachael, #1 has been fixed, can you verify please?"
+  if a few issues are waiting for you:
+    before each:
+      - rachael> I found a bug, jetpack is broken
+      - "hubot> nice catch @rachael!, tracked as #1"
+      - zhora> fixed that
+      - hubot> sweet, that was the last one!. @rachael can you verify? (#1 jetpack is broken)
+      - rachael> I found a bug, laser gun is broken
+      - "hubot> nice catch @rachael!, tracked as #2"
+      - zhora> fixed that
+      - hubot> sweet, that was the last one!. @rachael can you verify? (#2 laser gun is broken)
+      - pris> I found a bug, hoverboard is out of battery
+      - "hubot> nice catch @pris!, tracked as #3"
+      - rachael> I'm fixing that
+      - hubot> good luck with that
+      - pris> I found a bug, flux capacitor is burnt
+      - "hubot> nice catch @pris!, tracked as #4"
+      - rachael> I'm fixing that
+      - hubot> good luck with that
+    hubot will remind you about them:
+      - 110 hours later
+      - pris> hello!
+      - zhora> hello!
+      - rachael> what's up?
+      - "hubot> @rachael, we are waiting for you on #1, #2, #3 and #4"
   if an issue is waiting for clarification:
   if an issue is waiting for verification:

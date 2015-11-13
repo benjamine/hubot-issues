@@ -31,11 +31,15 @@ cannot reject, issue not fixed:
 cannot verify, issue not fixed:
   - "#<%= issue.id %> is not fixed, it's <%= issue.state %>"
 issue fixed:
-  - "sweet!, @<%= issue.author %> can you verify? (#<%= issue.id %> <%= issue.description %>)"
+  - "sweet, <% if (pendingIssues.length) {%>only <%= pendingIssues.length %> more to go!<%} else {%>that was the last one!<%}%>. @<%= issue.author %> can you verify? (#<%= issue.id %> <%= issue.description %>)"
 issue fixed by author:
   - "sweet!, you did it yourself"
 rejected fix:
   - "oops!, #<%= issue.id %> is going to need more fixing @<%= issue.assignee %>"
+rejected fix, no reason:
+  - "oops!, @<%= user %> can you give your reason for rejecting?"
+rejected fix, got reason:
+  - "got it, #<%= issue.id %> is going to need more fixing @<%= issue.assignee %>"
 rejected your fix:
   - "oops!, no problem, let me know when it's fixed"
 verified fix:
@@ -82,3 +86,13 @@ list group:
   - "== <%= group.name %> =="
 list issue:
   - "- #<%= issue.id %> <%= issue.description %><% if (tags) {%> <%= tags %><%}%>, by @<%= issue.author %><% if (issue.assignee) {%>, <% if (issue.state==='pending') {%>getting <%}%>fixed by @<%= issue.assignee%><%}%>"
+pending issue waiting:
+  - "just a reminder, a pending issue is waiting for a volunteer"
+pending issues waiting:
+  - "just a reminder, <%= issues.length %> pending issues are waiting for volunteers"
+issue waiting for your fix:
+  - "@<%= user %> are you still working on #<%= issue.id %>? can we help you?"
+issue waiting for your verification:
+  - "@<%= user %>, #<%= issue.id %> has been fixed, can you verify please?"
+issues waiting for you:
+  - "@<%= user %>, we are waiting for you on <%= issuesList %>"

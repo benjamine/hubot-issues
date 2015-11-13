@@ -8,6 +8,7 @@ var yaml = require('js-yaml');
 var fs = require('fs');
 var path  = require('path');
 var chalk = require('chalk');
+var brainCleanup = require('./fixtures/brain-cleanup');
 
 var debug = !process.env.SILENT;
 
@@ -100,13 +101,54 @@ describe('hubotIssues', function(){
       return new Promise(function(resolve, reject) {
         try {
           for (var name in expected) {
-            var actual = brain.get(name);
+            var actual = brainCleanup(brain.get(name));
             expect(actual).to.eql(expected[name]);
           }
         } catch(err) {
           return reject(err);
         }
         log('brain check OK');
+        resolve();
+      });
+    };
+  }
+
+  function shiftTime(quantity, unit) {
+    if (/^(a|an)$/i.test(quantity)) {
+      quantity = 1;
+    } else {
+      quantity = +quantity;
+    }
+
+    var unitSeconds = 1;
+    switch (unit) {
+      case 'minute':
+        unitSeconds = 60;
+        break;
+      case 'hour':
+        unitSeconds = 3600;
+        break;
+      case 'day':
+        unitSeconds = 24 * 3600;
+        break;
+      case 'week':
+        unitSeconds = 7 * 24 * 3600;
+        break;
+      case 'month':
+        unitSeconds = 30 * 24 * 3600;
+        break;
+      case 'year':
+        unitSeconds = 365 * 24 * 3600;
+        break;
+    }
+
+    var brain = this.room.robot.brain;
+    var totalTime = quantity * unitSeconds * 1000;
+    return function() {
+      return new Promise(function(resolve) {
+        var currentTimeShift = brain.get('timeShift') || 0;
+        brain.set('timeShift', currentTimeShift + totalTime);
+        log(quantity + ' ' + unit + '(s) later');
         resolve();
       });
     };
@@ -123,6 +165,11 @@ describe('hubotIssues', function(){
     }
     items.forEach(function(item){
       if (typeof item === 'string') {
+        var timeShift = /^(\d+|a|an) (second|minute|hour|day|week|month|year)s? later$/i.exec(item);
+        if (timeShift) {
+          nextPromise(shiftTime.call(this, timeShift[1], timeShift[2]));
+          return;
+        }
         var message = /([^>]+)> ?([\s\S]+)$/.exec(item);
         if (!message) {
           throw new Error('invalid chat message: ' + item);
