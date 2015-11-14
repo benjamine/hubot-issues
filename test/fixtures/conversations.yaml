@@ -13,20 +13,29 @@ introduction:
 track new issues:
   I found ...:
     hubot tracks it:
-      - rachael> I found a bug, jetpack is broken
+      - rachael> I found a bug, jetpack is not starting
       - "hubot> nice catch @rachael!, tracked as #1"
       -
         brain:
           hubotissues:
             -
               id: 1
-              description: jetpack is broken
+              description: jetpack is not starting
               author: rachael
               state: pending
-
+  bad descriptions:
+    hubot asks for better descriptions:
+      - rachael> I found a bug, jetpack is broken
+      - hubot> can you be more specific? (eg. actual vs. expected behavior, a screenshot could be helpful)
+      - rachael> I found a bug, jetpack looks very bad
+      - hubot> can you be more specific? (eg. actual vs. expected behavior, a screenshot could be helpful)
+      - rachael> I found a bug, shouldn't the jetpack work underwater?
+      - hubot> is that a question? can you explain what's the issue? (eg. actual vs. expected behavior, a screenshot could be helpful)
+      - rachael> I found a bug, add a bigger fuel tank to the jetpack
+      - hubot> mmm that looks like a task, can you explain what's the issue? (eg. actual vs. expected behavior, a screenshot could be helpful)
 a pending issue:
   before each:
-    - rachael> I found a bug, jetpack is broken
+    - rachael> I found a bug, jetpack is not starting
     - "hubot> nice catch @rachael!, tracked as #1"
   I'm fixing:
     hubot tracks that:
@@ -37,7 +46,7 @@ a pending issue:
           hubotissues:
             -
               id: 1
-              description: jetpack is broken
+              description: jetpack is not starting
               author: rachael
               assignee: zhora
               state: pending
@@ -50,27 +59,27 @@ a pending issue:
           hubotissues:
             -
               id: 1
-              description: jetpack is broken
+              description: jetpack is not starting
               author: rachael
               assignee: zhora
               state: pending
   fixed:
     hubot asks for verification:
       - "zhora> fixed #1"
-      - hubot> sweet, that was the last one!. @rachael can you verify? (#1 jetpack is broken)
+      - hubot> sweet, that was the last one!. @rachael can you verify? (#1 jetpack is not starting)
       -
         brain:
           hubotissues:
             -
               id: 1
-              description: jetpack is broken
+              description: jetpack is not starting
               author: rachael
               assignee: zhora
               state: fixed
 
 fixing an issue:
   before each:
-    - rachael> I found a bug, jetpack is broken
+    - rachael> I found a bug, jetpack is not starting
     - "hubot> nice catch @rachael!, tracked as #1"
     - "zhora> fixing #1"
     - hubot> good luck with that
@@ -89,15 +98,15 @@ fixing an issue:
   fixed:
     hubot asks for verification:
       - "zhora> fixed #1"
-      - hubot> sweet, that was the last one!. @rachael can you verify? (#1 jetpack is broken)
+      - hubot> sweet, that was the last one!. @rachael can you verify? (#1 jetpack is not starting)
     hubot tells you if someone else was fixing it:
       - "pris> fixed #1"
       - hubot> I thought @zhora was doing that
-      - hubot> sweet, that was the last one!. @rachael can you verify? (#1 jetpack is broken)
+      - hubot> sweet, that was the last one!. @rachael can you verify? (#1 jetpack is not starting)
   fixed that:
     hubot asks for verification:
       - "zhora> fixed that"
-      - hubot> sweet, that was the last one!. @rachael can you verify? (#1 jetpack is broken)
+      - hubot> sweet, that was the last one!. @rachael can you verify? (#1 jetpack is not starting)
   fixed it myself:
     hubot considers it verified:
       - "rachael> I fixed that"
@@ -108,42 +117,42 @@ fixing an issue:
           hubotissues:
             -
               id: 1
-              description: jetpack is broken
+              description: jetpack is not starting
               author: rachael
               assignee: rachael
               state: verified
   is a duplicate:
     hubot will tell the author:
-      - rachael> I found a bug, jetpack is not working
+      - rachael> I found a bug, jetpack is not starting
       - "hubot> nice catch @rachael!, tracked as #2"
       - "zhora> that is a duplicate of #1"
       - "hubot> got it, #2 is gone, added @rachael comment to #1"
     if you don't say it, hubot will ask you of which:
-      - rachael> I found a bug, jetpack is not working
+      - rachael> I found a bug, jetpack is not starting
       - "hubot> nice catch @rachael!, tracked as #2"
       - "zhora> dup"
       - "hubot> duplicate of which?"
       - "zhora> of #1"
       - "hubot> got it, #2 is gone, added @rachael comment to #1"
     works the other way around too:
-      - rachael> I found a bug, jetpack is not working
+      - rachael> I found a bug, jetpack is not starting
       - "hubot> nice catch @rachael!, tracked as #2"
       - "zhora> #1 is a duplicate of that"
       - "hubot> got it, #1 is gone, added @rachael comment to #2"
     works the other way around too:
-      - rachael> I found a bug, jetpack is not working
+      - rachael> I found a bug, jetpack is not starting
       - "hubot> nice catch @rachael!, tracked as #2"
       - "zhora> #1 is a duplicate of that"
       - "hubot> got it, #1 is gone, added @rachael comment to #2"
   needs clarification:
     hubot will ask the author for it:
       - "zhora> #1 needs clarification, is it on fire?"
-      - "hubot> @rachael, can you answer that? (about jetpack is broken)"
+      - "hubot> @rachael, can you answer that? (about jetpack is not starting)"
     hubot will ask you for a question:
       - "zhora> that needs clarification"
       - "hubot> what's your question?"
       - "zhora> is it on fire?"
-      - "hubot> @rachael, can you answer that? (about jetpack is broken)"
+      - "hubot> @rachael, can you answer that? (about jetpack is not starting)"
   adding information:
     comment about an issue:
       hubot will remember it:
@@ -154,7 +163,7 @@ fixing an issue:
             hubotissues:
               -
                 id: 1
-                description: jetpack is broken
+                description: jetpack is not starting
                 author: rachael
                 assignee: zhora
                 state: pending
@@ -170,7 +179,7 @@ fixing an issue:
             hubotissues:
               -
                 id: 1
-                description: jetpack is broken
+                description: jetpack is not starting
                 author: rachael
                 assignee: zhora
                 state: pending
@@ -186,7 +195,7 @@ fixing an issue:
             hubotissues:
               -
                 id: 1
-                description: jetpack is broken
+                description: jetpack is not starting
                 author: rachael
                 assignee: zhora
                 state: pending
@@ -196,7 +205,7 @@ fixing an issue:
                   - blocker
     tagging multiple issues:
       hubot will tag them all:
-        - rachael> I found a bug, laser gun is broken
+        - rachael> I found a bug, laser gun is jammed
         - "hubot> nice catch @rachael!, tracked as #2"
         - rachael> I found a bug, hoverboard is out of battery
         - "hubot> nice catch @rachael!, tracked as #3"
@@ -211,7 +220,7 @@ fixing an issue:
             hubotissues:
               -
                 id: 1
-                description: jetpack is broken
+                description: jetpack is not starting
                 author: rachael
                 assignee: zhora
                 state: pending
@@ -220,7 +229,7 @@ fixing an issue:
                   - important
               -
                 id: 2
-                description: laser gun is broken
+                description: laser gun is jammed
                 author: rachael
                 state: pending
                 tags:
@@ -248,14 +257,14 @@ fixing an issue:
             hubotissues:
               -
                 id: 1
-                description: jetpack is broken
+                description: jetpack is not starting
                 author: rachael
                 assignee: zhora
                 state: pending
 
 issue details:
   before each:
-    - rachael> I found a bug, jetpack is broken
+    - rachael> I found a bug, jetpack is not starting
     - "hubot> nice catch @rachael!, tracked as #1"
     - "zhora> fixing #1"
     - hubot> good luck with that
@@ -270,7 +279,7 @@ issue details:
   asking about a pending issue getting fixed:
     hubot has the details:
     - "pris> 1?"
-    - "hubot> pending, #1 jetpack is broken, by @rachael, getting fixed by @zhora"
+    - "hubot> pending, #1 jetpack is not starting, by @rachael, getting fixed by @zhora"
   asking about a pending issue with tags and comments:
     hubot has the details:
     - "pris> 2?"
@@ -278,10 +287,10 @@ issue details:
 
 a fixed issue:
   before each:
-    - rachael> I found a bug, jetpack is broken
+    - rachael> I found a bug, jetpack is not starting
     - "hubot> nice catch @rachael!, tracked as #1"
     - "zhora> fixed that"
-    - hubot> sweet, that was the last one!. @rachael can you verify? (#1 jetpack is broken)
+    - hubot> sweet, that was the last one!. @rachael can you verify? (#1 jetpack is not starting)
   reject:
     author rejects it with no explanation:
       hubot will ask for an explanation:
@@ -294,7 +303,7 @@ a fixed issue:
             hubotissues:
               -
                 id: 1
-                description: jetpack is broken
+                description: jetpack is not starting
                 author: rachael
                 assignee: zhora
                 state: pending
@@ -309,7 +318,7 @@ a fixed issue:
             hubotissues:
               -
                 id: 1
-                description: jetpack is broken
+                description: jetpack is not starting
                 author: rachael
                 assignee: zhora
                 state: pending
@@ -328,7 +337,7 @@ a fixed issue:
             hubotissues:
               -
                 id: 1
-                description: jetpack is broken
+                description: jetpack is not starting
                 author: rachael
                 assignee: zhora
                 state: pending
@@ -339,13 +348,13 @@ a fixed issue:
     author verifies it:
       hubot will notify the fixer:
         - "rachael> verified 1"
-        - "hubot> great news!, @zhora good work fixing #1 jetpack is broken"
+        - "hubot> great news!, @zhora good work fixing #1 jetpack is not starting"
         -
           brain:
             hubotissues:
               -
                 id: 1
-                description: jetpack is broken
+                description: jetpack is not starting
                 author: rachael
                 assignee: zhora
                 state: verified
@@ -360,7 +369,7 @@ a fixed issue:
 
 delete:
   before each:
-    - rachael> I found a bug, jetpack is broken
+    - rachael> I found a bug, jetpack is not starting
     - "hubot> nice catch @rachael!, tracked as #1"
   delete one issue:
     if you're the author hubot just does it:
@@ -371,7 +380,7 @@ delete:
         hubotissues: []
     otherwise it will let the author know:
     - "pris> delete #1"
-    - "hubot> #1 is gone (jetpack is broken by @rachael)"
+    - "hubot> #1 is gone (jetpack is not starting by @rachael)"
   delete verified issues:
     hubot deletes them all:
     - rachael> I found a bug, laser gun is jammed
@@ -379,9 +388,9 @@ delete:
     - rachael> I found a bug, hoverboard is out of battery
     - "hubot> nice catch @rachael!, tracked as #3"
     - zhora> fixed 1
-    - hubot> sweet, only 2 more to go!. @rachael can you verify? (#1 jetpack is broken)
+    - hubot> sweet, only 2 more to go!. @rachael can you verify? (#1 jetpack is not starting)
     - rachael> verified that
-    - "hubot> great news!, @zhora good work fixing #1 jetpack is broken"
+    - "hubot> great news!, @zhora good work fixing #1 jetpack is not starting"
     - zhora> fixed 3
     - hubot> sweet, only 1 more to go!. @rachael can you verify? (#3 hoverboard is out of battery)
     - rachael> verified that
@@ -392,9 +401,9 @@ delete:
 lists:
   before each:
     # add some bugs
-    - rachael> I found a bug, jetpack is broken
+    - rachael> I found a bug, jetpack is not starting
     - "hubot> nice catch @rachael!, tracked as #1"
-    - rachael> I found a bug, laser gun is broken
+    - rachael> I found a bug, laser gun is not starting
     - "hubot> nice catch @rachael!, tracked as #2"
     - rachael> I found a bug, hoverboard is out of battery
     - "hubot> nice catch @rachael!, tracked as #3"
@@ -414,15 +423,15 @@ lists:
       - zhora> pending bugs?
       - |
         hubot> == pending ==
-        - #1 jetpack is broken, by @rachael
-        - #2 laser gun is broken, by @rachael, getting fixed by @zhora
+        - #1 jetpack is not starting, by @rachael
+        - #2 laser gun is not starting, by @rachael, getting fixed by @zhora
   bugs?:
     hubot lists pending and fixed bugs:
       - zhora> bugs?
       - |
         hubot> == pending ==
-        - #1 jetpack is broken, by @rachael
-        - #2 laser gun is broken, by @rachael, getting fixed by @zhora
+        - #1 jetpack is not starting, by @rachael
+        - #2 laser gun is not starting, by @rachael, getting fixed by @zhora
         == fixed ==
         - #3 hoverboard is out of battery, by @rachael, fixed by @pris
   verified bugs?:
@@ -440,7 +449,7 @@ lists:
       - zhora> important bugs?
       - |
         hubot> == pending ==
-        - #2 laser gun is broken #important, by @rachael, getting fixed by @zhora
+        - #2 laser gun is not starting #important, by @rachael, getting fixed by @zhora
         == fixed ==
         - #3 hoverboard is out of battery #important and #fun, by @rachael, fixed by @pris
 
@@ -454,19 +463,19 @@ my issues:
     - zhora> what can I fix next?
       - |
         hubot> == pending ==
-        - #2 laser gun is broken #important, by @rachael, getting fixed by @zhora
+        - #2 laser gun is not starting #important, by @rachael, getting fixed by @zhora
   otherwise it has issues I could fix:
     - pris> what can I do?
       - |
         hubot>== pending ==
-        - #1 jetpack is broken, by @rachael
+        - #1 jetpack is not starting, by @rachael
 
 notifications:
   if pending issues are waiting:
     before each:
-      - rachael> I found a bug, jetpack is broken
+      - rachael> I found a bug, jetpack is not starting
       - "hubot> nice catch @rachael!, tracked as #1"
-      - rachael> I found a bug, laser gun is broken
+      - rachael> I found a bug, laser gun is not starting
       - "hubot> nice catch @rachael!, tracked as #2"
       - rachael> I found a bug, hoverboard is out of battery
       - "hubot> nice catch @rachael!, tracked as #3"
@@ -485,9 +494,22 @@ notifications:
       - 14 hours later
       - pris> good evening!
       - hubot> just a reminder, 4 pending issues are waiting for volunteers
+  when you tell him to shut up on a room:
+    it won't notify about issues:
+      - rachael> I found a bug, jetpack is not starting
+      - "hubot> nice catch @rachael!, tracked as #1"
+      - pris> no notifications here
+      - "hubot> ok, I won't notify about issues on this room anymore"
+      - 4 days later
+      - pris> good morning!
+      - zhora> good morning!
+      - pris> do send notifications here
+      - "hubot> ok, I will notify about issues on this room"
+      - zhora> good morning!
+      - hubot> just a reminder, a pending issue is waiting for a volunteer
   if an issue is still getting fixed:
     before each:
-      - rachael> I found a bug, jetpack is broken
+      - rachael> I found a bug, jetpack is not starting
       - "hubot> nice catch @rachael!, tracked as #1"
       - zhora> I'll fix that
       - hubot> good luck with that
@@ -498,10 +520,10 @@ notifications:
       - "hubot> @zhora are you still working on #1? can we help you?"
   if an issue is still waiting for verification:
     before each:
-      - rachael> I found a bug, jetpack is broken
+      - rachael> I found a bug, jetpack is not starting
       - "hubot> nice catch @rachael!, tracked as #1"
       - zhora> fixed that
-      - hubot> sweet, that was the last one!. @rachael can you verify? (#1 jetpack is broken)
+      - hubot> sweet, that was the last one!. @rachael can you verify? (#1 jetpack is not starting)
     hubot will remind the issue author:
       - 110 hours later
       - pris> hello!
@@ -510,14 +532,14 @@ notifications:
       - "hubot> @rachael, #1 has been fixed, can you verify please?"
   if a few issues are waiting for you:
     before each:
-      - rachael> I found a bug, jetpack is broken
+      - rachael> I found a bug, jetpack is not starting
       - "hubot> nice catch @rachael!, tracked as #1"
       - zhora> fixed that
-      - hubot> sweet, that was the last one!. @rachael can you verify? (#1 jetpack is broken)
-      - rachael> I found a bug, laser gun is broken
+      - hubot> sweet, that was the last one!. @rachael can you verify? (#1 jetpack is not starting)
+      - rachael> I found a bug, laser gun is not starting
       - "hubot> nice catch @rachael!, tracked as #2"
       - zhora> fixed that
-      - hubot> sweet, that was the last one!. @rachael can you verify? (#2 laser gun is broken)
+      - hubot> sweet, that was the last one!. @rachael can you verify? (#2 laser gun is not starting)
       - pris> I found a bug, hoverboard is out of battery
       - "hubot> nice catch @pris!, tracked as #3"
       - rachael> I'm fixing that
@@ -532,5 +554,3 @@ notifications:
       - zhora> hello!
       - rachael> what's up?
       - "hubot> @rachael, we are waiting for you on #1, #2, #3 and #4"
-  if an issue is waiting for clarification:
-  if an issue is waiting for verification:

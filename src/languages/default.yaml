@@ -1,0 +1,164 @@
+hear:
+  that might be a bug:
+    - "that (?:looks like|seems|could be|is|might be) a bug$"
+    - "(?:it seems|maybe|I see|it seems|it looks(?: like)?)? ?(.*) (?:is|are|seems?|looks?)? broken\\??$"
+  yes, please, how?:
+    - "(yes|yes, please|please|how\\?|would you\\?|nice|go ahead|can you\\?)$"
+  how do I track bugs?:
+    - "how (do|can) (I|you|we) (track|log|add|file|register|create) (issues|bugs|an issue|a bug)\\??$"
+  I found a bug:
+    - "(?:I )?found a bug(?:[, ]+)?([\\s\\S]+)$"
+  what's broken?:
+    - "^(?:any )?blockers\\?$"
+    - "^what's (?:broken|to be fixed|pending)\\??$"
+    - "^(?:list|any|is there any|do we have|give me|which are)?(?: the| our)? ?(?:(.+)? )?(?:bugs|issues)\\??$"
+  what can I do next?:
+    - "^(?:what|which)(?: issues?| bugs?) can I (?:fix|do|work on)(?: next| now)?\\??$"
+    - "^(?:(?:what|which) are )?my (?:issues|bugs)\\??$"
+  I'm fixing that:
+    - "^\\#?(\\d+|that|it)( is|'s) mine$"
+    - "^(?:I'm )?(?:fixing|doing|taking care of|killing|with|on) \\#?(\\d+|that|it)$"
+    - "^I(?:'ll| will| can)? (?:fix|do|take care of|kill|try|debug|see|check) \\#?(\\d+|that|it)$"
+  I'm not fixing that:
+    - "^(?:I'm )?not (?:fixing|doing|taking care of|killing|with|on) \\#?(\\d+|that|it)(?: anymore)?$"
+    - "^(?:I )?(?:won't|can't) (?:fix|do|take care of|kill|try|debug|see|check) \\#?(\\d+|that|it)(?: anymore)?$"
+  I fixed that:
+    - "\\#?(\\d+|that|it)(?:'s| is)? (?:fixed|done|ok now|solved|gone)$"
+    - "(?:I(?:'ve| have) )?(?:fixed|done|took care of|killed|did) \\#?(\\d+|that|it)$"
+  needs clarification:
+    - "^()(?:needs clarification|is unclear|is confusing)(?:[, ]+)?([\\s\\S]+)?$"
+    - "^\\#?(\\d+|that|it)(?:'s| is)? (?:needs clarification|unclear|confusing)(?:[, ]+)?([\\s\\S]+)?$"
+  about that:
+    - "^()(?:also|and|but)(?:[, ]+)?([\\s\\S]+)?$"
+    - "^about \\#?(\\d+|that|it)(?:[, ]+)?([\\s\\S]+)?$"
+  that is tag:
+    - "^((?:(?:and +)?(?:\\#?\\d+|that|it)(?:[, ]+)?){2,20}) are ([\\w\\d \\-',.#]+)?$"
+    - "^\\#?(\\d+|that|it) is ([\\w\\d \\-',.#]+)?$"
+  duplicate:
+    - "^dup(?:licate)?$"
+    - "^\\#?(\\d+|that|it)(?:'s| is)? (?:(?:a )?dup(?:licate)?)$"
+  duplicate of:
+    - "^(?:dup(?:licate)? )?(of) \\#?(\\d+|that|it)$"
+    - "\\#?(\\d+|that|it)(?:'s| is)? (?:(?:a )?dup(?:licate)? of|same as) \\#?(\\d+|that|it)$"
+  tell me about that:
+    - "^(?:(?:what|tell (?:me|us)|details) about )?\\#?(\\d+|that|it)(?: details| info)?\\??$"
+  reject that:
+    - "\\#?(\\d+|that|it)(?:'s| is)?(?:not fixed|not done|not ok|not solved|not gone|rejected)(?:\\s*,\\s*)?([\\s\\S]*)$"
+    - "(?:I(?:'ve| have) )?(?:reject(?:ed)?) \\#?(\\d+|that|it)(?:\\s*,\\s*)?([\\s\\S]*)$"
+  verified that:
+    - "\\#?(\\d+|that|it)(?:'s| is)? verified$"
+    - "(?:I(?:'ve| have) )?(?:verif(?:y|ied)) \\#?(\\d+|that|it)$"
+  delete that:
+    - "^(?:delete|kill) \\#?(\\d+|that|it)$"
+  delete verified:
+    - "^(?:delete|kill) verified (?:issues|bugs)$"
+  no notifications here:
+    - "^(?:no|stop|disable|don't send) (?:notifications|messages) (?:here|on this (?:room|channel))(\\s*,\\s*please\\!?)?$"
+  do notifications here:
+    - "^(?:(?:do |you can )?send|enable) (?:notifications|messages) (?:here|on this (?:room|channel))(\\s*,\\s*please\\!?)?$"
+  nevermind:
+    - "^nevermind|nothing|none$"
+
+answer:
+  maybe you found a bug on:
+    - maybe you found a bug on "<%= thing %>"? do you wan't me to track it?
+  maybe you found a bug:
+    - maybe you found a bug on? do you wan't me to track it?
+  say I found a bug:
+    - just say "I found a bug, <a good concise description>"
+  issue created:
+    - "nice catch @<%= user %>!, tracked as #<%= issue.id %>"
+  issue not found:
+    - "there's no issue #<%= id %>, are you sure that's the number?"
+  issue not found in context:
+    - "sorry, which you mean by '<%= ref %>'?"
+  issue assigned:
+    - "good luck with that"
+  issue unassigned:
+    - "no problem, someone else will volunteer"
+  issue already assigned to you:
+    - "yes, we know that"
+  issue already not assigned to you:
+    - "who said you were?"
+  issue already assigned to someone else:
+    - "wait! @<%= issue.assignee %> is already doing that"
+  issue was being fixed by someone else:
+    - "I thought @<%= issue.assignee %> was doing that"
+  cannot assign, issue not pending:
+    - "#<%= issue.id %> is already <%= issue.state %>"
+  cannot fix, issue not pending:
+    - "#<%= issue.id %> is already <%= issue.state %>"
+  cannot reject, issue not fixed:
+    - "#<%= issue.id %> is not fixed, it's <%= issue.state %>"
+  cannot verify, issue not fixed:
+    - "#<%= issue.id %> is not fixed, it's <%= issue.state %>"
+  issue fixed:
+    - "sweet, <% if (pendingIssues.length) {%>only <%= pendingIssues.length %> more to go!<%} else {%>that was the last one!<%}%>. @<%= issue.author %> can you verify? (#<%= issue.id %> <%= issue.description %>)"
+  issue fixed by author:
+    - "sweet!, you did it yourself"
+  rejected fix:
+    - "oops!, #<%= issue.id %> is going to need more fixing @<%= issue.assignee %>"
+  rejected fix, no reason:
+    - "oops!, @<%= user %> can you give your reason for rejecting?"
+  rejected fix, got reason:
+    - "got it, #<%= issue.id %> is going to need more fixing @<%= issue.assignee %>"
+  rejected your fix:
+    - "oops!, no problem, let me know when it's fixed"
+  verified fix:
+    - "great news!, @<%= issue.assignee %> good work fixing #<%= issue.id %> <%= issue.description %>"
+  only author can verify:
+    - "that's great, but I'll wait for @<%= issue.author %> to verify that"
+  issue deleted:
+    - "#<%= issue.id %> is gone (<%= issue.description %> by @<%= issue.author %>)"
+  issues deleted:
+    - "<%= count %> issue(s) deleted"
+  issue deleted by author:
+    - "#<%= issue.id %> is gone"
+  issue duplicate deleted:
+    - "got it, #<%= duplicate.id %> is gone, added @<%= duplicate.author %> comment to #<%= issue.id %>"
+  issue duplicate of itself?:
+    - "ehm, do you see your own doppelgänger when looking at a mirror?"
+  duplicate of which?:
+    - "duplicate of which?"
+  that duplicate of that?:
+    - "ehm, can you be more specific?"
+  issue needs clarification, what's your question?:
+    - "what's your question?"
+  issue needs clarification, can author answer?:
+    - "@<%= issue.author %>, can you answer that? (about <%= issue.description %>)"
+  comment added:
+    - "got it"
+  comment, what?:
+    - "tell me"
+  issues tagged:
+    - "<%= issues %> are now <%= tags %>"
+  issue tagged:
+    - "#<%= issue.id %> is now <%= tags %>"
+  issue has no tags:
+    - "#<%= issue.id %> has no tags"
+  issue details:
+    - "<%= issue.state %>, #<%= issue.id %> <%= issue.description %><% if (tags) {%> <%= tags %><%}%>, by @<%= issue.author %><% if (issue.assignee) {%>, <% if (issue.state==='pending') {%>getting <%}%>fixed by @<%= issue.assignee%><%}%>"
+  issue details log entry:
+    - "- <%= text %>"
+  list empty:
+    - "no <%= (type && (type + ' ') || '') %>issues"
+  your list empty:
+    - "sorry, I have nothing for you"
+  list group:
+    - "== <%= group.name %> =="
+  list issue:
+    - "- #<%= issue.id %> <%= issue.description %><% if (tags) {%> <%= tags %><%}%>, by @<%= issue.author %><% if (issue.assignee) {%>, <% if (issue.state==='pending') {%>getting <%}%>fixed by @<%= issue.assignee%><%}%>"
+  pending issue waiting:
+    - "just a reminder, a pending issue is waiting for a volunteer"
+  pending issues waiting:
+    - "just a reminder, <%= issues.length %> pending issues are waiting for volunteers"
+  issue waiting for your fix:
+    - "@<%= user %> are you still working on #<%= issue.id %>? can we help you?"
+  issue waiting for your verification:
+    - "@<%= user %>, #<%= issue.id %> has been fixed, can you verify please?"
+  issues waiting for you:
+    - "@<%= user %>, we are waiting for you on <%= issuesList %>"
+  notifications off:
+    - "ok, I won't notify about issues on this room anymore"
+  notifications on:
+    - "ok, I will notify about issues on this room"

@@ -13,36 +13,26 @@ module.exports = function(robot) {
     hubot utilities
     ===============
 
-    response templates:
-      - command to load another yaml file (robot "moods")
-
     demo page:
       - run on a web page, localstorage brain?, use a mock robot
 
-    issue tracking
-    ==============
+    response templates:
+      - command to load another yaml file (robot "moods")
 
-    lists:
-      - use emojis to save space
-
-    state-machine pattern:
-      - issue state change handlers
-      - robot events for state changes
   */
 
   var _ = require('lodash');
   var BrainRepo = require('./brain-repo');
   var repo = new BrainRepo(robot, { key: 'hubotissues' });
+  var settingsRepo = new BrainRepo(robot, { key: 'hubotissuessettings' });
   var Chatter = require('./chatter');
   var chatter = new Chatter(robot);
+  var descriptionAnalyzer = require('./description-analyzer');
 
   /* introduction */
 
-  chatter.hear([
-    /that (?:looks like|seems|could be|is|might be) a bug$/i,
-    /(?:it seems|maybe|I see|it seems|it looks(?: like)?)? ?(.*) (?:is|are|seems?|looks?)? broken\??$/i,
-  ], function(res, thing) {
-    if (/I found a bug(?:[, ]+)?([\s\S]+)$/i.test(res.match[0])) {
+  chatter.hear('that might be a bug', function(res, thing) {
+    if (chatter.matches('I found a bug', res.match[0])) {
       // a bug that will be tracked
       return;
     }
@@ -54,23 +44,61 @@ module.exports = function(robot) {
     this.setReplyContext(res, 'maybefoundabug', true);
   });
 
-  chatter.hear([
-    /(yes|yes, please|please|how\?|would you\?|nice|go ahead|can you\?)$/i,
-  ], function(res) {
+  chatter.hear('yes, please, how?', function(res) {
     if (this.getReplyContext(res, 'maybefoundabug')) {
       this.send(res, 'say I found a bug');
     }
   });
 
-  chatter.hear([
-    /how (do|can) (I|you|we) (track|log|add|file|register|create) (issues|bugs|an issue|a bug)\?$/i,
-  ], function(res) {
+  chatter.hear('how do I track bugs?', function(res) {
     this.send(res, 'say I found a bug');
   });
 
+  function getRoomSettings(room) {
+    var rooms = settingsRepo.get('rooms');
+    if (!rooms) {
+      return {};
+    }
+    return rooms.list[room] || {};
+  }
+
+  function saveRoomSettings(room, settings) {
+    var rooms = settingsRepo.get('rooms');
+    if (!rooms) {
+      rooms = settingsRepo.create({
+        id: 'rooms',
+        list: []
+      });
+    }
+    var update = false;
+    if (!rooms.list[room]) {
+      rooms.list[room] = settings;
+      update = true;
+    } else {
+      var roomSettings = rooms.list[room];
+      Object.keys(settings).forEach(function(key) {
+        if (roomSettings[key] !== settings[key]) {
+          roomSettings[key] = settings[key];
+          update = true;
+        }
+      });
+    }
+    if (update) {
+      settingsRepo.update(rooms);
+    }
+    return rooms.list[room];
+  }
+
   /* creating */
 
-  chatter.hear(/(?:I )?found a bug(?:[, ]+)?([\s\S]+)$/i, function(res, description) {
+  chatter.hear('I found a bug', function(res, description) {
+
+    var analysis = descriptionAnalyzer.analyze(description);
+    if (analysis.message) {
+      res.send(analysis.message);
+      return;
+    }
+
     var issue = repo.create({
       description: description,
       author: res.message.user.name,
@@ -79,6 +107,7 @@ module.exports = function(robot) {
       state: 'pending'
     });
     this.setRoomContext(res, 'issueid', issue.id);
+    saveRoomSettings(res.message.room, { notifications: true });
     this.send(res, 'issue created', { issue: issue });
   });
 
@@ -124,11 +153,7 @@ module.exports = function(robot) {
     return list.join('\n');
   }
 
-  chatter.hear([
-    /^(?:any )?blockers\?$/i,
-    /^what's (?:broken|to be fixed|pending)\??$/i,
-    /^(?:list|any|is there any|do we have|give me|which are)?(?: the| our)? ?(?:(.+)? )?(?:bugs|issues)\??$/i
-  ], function(res, type) {
+  chatter.hear('what\'s broken?', function(res, type) {
     type = (type || '').trim().toLowerCase();
     if (type === 'all') {
       type = '';
@@ -159,10 +184,7 @@ module.exports = function(robot) {
     res.send(formatList(res, issues));
   });
 
-  chatter.hear([
-    /^(?:what|which)(?: issues?| bugs?) can I (?:fix|do|work on)(?: next| now)?\??$/i,
-    /^(?:(?:what|which) are )?my (?:issues|bugs)\??$/i,
-  ], function(res) {
+  chatter.hear('what can I do next?', function(res) {
 
     var user = res.message.user.name;
     var issues = repo.filter(function(issue){
@@ -189,11 +211,7 @@ module.exports = function(robot) {
 
   /* assign */
 
-  chatter.hear([
-    /^\#?(\d+|that|it)( is|'s) mine$/i,
-    /^(?:I'm )?(?:fixing|doing|taking care of|killing|with|on) \#?(\d+|that|it)$/i,
-    /^I(?:'ll| will| can)? (?:fix|do|take care of|kill|try|debug|see|check) \#?(\d+|that|it)$/i
-  ], function(res, id) {
+  chatter.hear('I\'m fixing that', function(res, id) {
 
     if (['that', 'it'].indexOf(id.toLowerCase()) >= 0) {
       var context = this.getRoomContext(res, 'issueid');
@@ -229,10 +247,7 @@ module.exports = function(robot) {
     this.send(res, 'issue assigned', { issue: issue });
   });
 
-  chatter.hear([
-    /^(?:I'm )?not (?:fixing|doing|taking care of|killing|with|on) \#?(\d+|that|it)(?: anymore)?$/i,
-    /^(?:I )?(?:won't|can't) (?:fix|do|take care of|kill|try|debug|see|check) \#?(\d+|that|it)(?: anymore)?$/i
-  ], function(res, id) {
+  chatter.hear('I\'m not fixing that', function(res, id) {
 
     if (['that', 'it'].indexOf(id.toLowerCase()) >= 0) {
       var context = this.getRoomContext(res, 'issueid');
@@ -261,10 +276,7 @@ module.exports = function(robot) {
 
   /* fixed */
 
-  chatter.hear([
-    /\#?(\d+|that|it)(?:'s| is)? (?:fixed|done|ok now|solved|gone)$/i,
-    /(?:I(?:'ve| have) )?(?:fixed|done|took care of|killed|did) \#?(\d+|that|it)$/i,
-  ], function(res, id) {
+  chatter.hear('I fixed that', function(res, id) {
 
     if (['that', 'it'].indexOf(id.toLowerCase()) >= 0) {
       var context = this.getRoomContext(res, 'issueid');
@@ -312,10 +324,7 @@ module.exports = function(robot) {
 
   /* clarification */
 
-  chatter.hear([
-    /^()(?:needs clarification|is unclear|is confusing)(?:[, ]+)?([\s\S]+)?$/i,
-    /^\#?(\d+|that|it)(?:'s| is)? (?:needs clarification|unclear|confusing)(?:[, ]+)?([\s\S]+)?$/i,
-  ], function(res, id, question) {
+  chatter.hear('needs clarification', function(res, id, question) {
 
     if (!id) {
       id = 'that';
@@ -374,10 +383,7 @@ module.exports = function(robot) {
 
   /* commenting */
 
-  chatter.hear([
-    /^()(?:also|and|but)(?:[, ]+)?([\s\S]+)?$/i,
-    /^about \#?(\d+|that|it)(?:[, ]+)?([\s\S]+)?$/i,
-  ], function(res, id, comment) {
+  chatter.hear('about that', function(res, id, comment) {
 
     if (!id) {
       id = 'that';
@@ -422,8 +428,7 @@ module.exports = function(robot) {
     /^([\s\S]+)$/i,
   ], function(res, comment) {
 
-    if (/^()(?:also|and|but)(?:[, ]+)?([\s\S]+)?$/i.test(res.match[0]) ||
-      /^about \#?(\d+|that|it)(?:[, ]+)?([\s\S]+)?$/i.test(res.match[0])) {
+    if (chatter.matches('about that', res.match[0])) {
       return;
     }
 
@@ -448,7 +453,7 @@ module.exports = function(robot) {
     if (!context || !context.value) {
       return;
     }
-    if (/^nevermind|nothing|none$/i.test(comment.trim())) {
+    if (chatter.matches('nevermind', comment.trim())) {
       this.setReplyContext(res, 'addingCommentId', null);
       return;
     }
@@ -494,10 +499,7 @@ module.exports = function(robot) {
       ' and #' + tags[tags.length - 1];
   }
 
-  chatter.hear([
-    /^((?:(?:and +)?(?:\#?\d+|that|it)(?:[, ]+)?){2,20}) are ([\w\d \-',.#]+)?$/i,
-    /^\#?(\d+|that|it) is ([\w\d \-',.#]+)?$/i,
-  ], function(res, id, tagString) {
+  chatter.hear('that is tag', function(res, id, tagString) {
 
     var tags = parseTags(tagString);
     if (!tags || !tags.length) {
@@ -584,10 +586,7 @@ module.exports = function(robot) {
 
   /* duplicates */
 
-  chatter.hear([
-    /^dup(?:licate)?$/i,
-    /^\#?(\d+|that|it)(?:'s| is)? (?:(?:a )?dup(?:licate)?)$/i,
-  ], function(res, duplicateId) {
+  chatter.hear('duplicate', function(res, duplicateId) {
 
     if (!duplicateId) {
       duplicateId = 'that';
@@ -609,10 +608,7 @@ module.exports = function(robot) {
     this.send(res, 'duplicate of which?', { id: duplicateId });
   });
 
-  chatter.hear([
-    /^(?:dup(?:licate)? )?(of) \#?(\d+|that|it)$/i,
-    /\#?(\d+|that|it)(?:'s| is)? (?:(?:a )?dup(?:licate)? of|same as) \#?(\d+|that|it)$/i,
-  ], function(res, duplicateId, id) {
+  chatter.hear('duplicate of', function(res, duplicateId, id) {
 
     var context;
 
@@ -674,9 +670,7 @@ module.exports = function(robot) {
 
   /* issue details */
 
-  chatter.hear([
-    /^(?:(?:what|tell (?:me|us)|details) about )?\#?(\d+|that|it)(?: details| info)?\??$/i,
-  ], function(res, id) {
+  chatter.hear('tell me about that', function(res, id) {
 
     if (/^(\d+|that|it)$/.test(res.match[0])) {
       // just a number or word, it's probably not a question for me
@@ -712,10 +706,7 @@ module.exports = function(robot) {
 
   /* reject */
 
-  chatter.hear([
-    /\#?(\d+|that|it)(?:'s| is)?(?:not fixed|not done|not ok|not solved|not gone|rejected)(?:\s*,\s*)?([\s\S]*)$/i,
-    /(?:I(?:'ve| have) )?(?:reject(?:ed)?) \#?(\d+|that|it)(?:\s*,\s*)?([\s\S]*)$/i,
-  ], function(res, id, reason) {
+  chatter.hear('reject that', function(res, id, reason) {
 
     if (['that', 'it'].indexOf(id.toLowerCase()) >= 0) {
       var context = this.getRoomContext(res, 'issueid');
@@ -758,10 +749,7 @@ module.exports = function(robot) {
 
   /* verify */
 
-  chatter.hear([
-    /\#?(\d+|that|it)(?:'s| is)? verified$/i,
-    /(?:I(?:'ve| have) )?(?:verif(?:y|ied)) \#?(\d+|that|it)$/i,
-  ], function(res, id) {
+  chatter.hear('verified that', function(res, id) {
 
     if (['that', 'it'].indexOf(id.toLowerCase()) >= 0) {
       var context = this.getRoomContext(res, 'issueid');
@@ -795,9 +783,7 @@ module.exports = function(robot) {
 
   /* delete */
 
-  chatter.hear([
-    /^(?:delete|kill) \#?(\d+|that|it)$/i,
-  ], function(res, id) {
+  chatter.hear('delete that', function(res, id) {
 
     if (['that', 'it'].indexOf(id.toLowerCase()) >= 0) {
       var context = this.getRoomContext(res, 'issueid');
@@ -820,24 +806,37 @@ module.exports = function(robot) {
       'issue deleted by author' : 'issue deleted', { issue: issue });
   });
 
-  chatter.hear([
-    /^(?:delete|kill) verified (?:issues|bugs)$/i,
-  ], function(res) {
+  chatter.hear('delete verified', function(res) {
     var count = repo.deleteAll({ state: 'verified' }).count;
     this.send(res, 'issues deleted', { count: count });
   });
 
   /* notifications */
 
+  function currentTime() {
+    // time shift used when unit testing
+    var timeShift = robot.brain.get('timeShift') || 0;
+    return new Date().getTime() + timeShift;
+  }
+
+  function timeSince(date) {
+    var time = typeof date === 'number' ? date : date.getTime();
+    return currentTime() - time;
+  }
+
+  function hoursSince(date) {
+    return timeSince(date) / 1000 / 3600;
+  }
+
   chatter.hear([
     /^.*$/i,
   ], function(res) {
-    // TODO: maybe use _.throttle
 
-    // TODO: remove this if block
-    if (hoursSince(new Date()) < 24) {
+    var roomSettings = getRoomSettings(res.message.room);
+    if (!roomSettings.notifications) {
       return;
     }
+
     var user = res.message.user.name;
     var issues = repo.filter(function(issue){
       if (issue.state === 'verified') {
@@ -895,19 +894,24 @@ module.exports = function(robot) {
     }
   });
 
-  function currentTime() {
-    // time shift used when unit testing
-    var timeShift = robot.brain.get('timeShift') || 0;
-    return new Date().getTime() + timeShift;
-  }
+  /* settings */
 
-  function timeSince(date) {
-    var time = typeof date === 'number' ? date : date.getTime();
-    return currentTime() - time;
-  }
+  chatter.hear('no notifications here', function(res) {
 
-  function hoursSince(date) {
-    return timeSince(date) / 1000 / 3600;
-  }
+    saveRoomSettings(res.message.room, {
+      notifications: false
+    });
+
+    this.send(res, 'notifications off');
+  });
+
+  chatter.hear('do notifications here', function(res) {
+
+    saveRoomSettings(res.message.room, {
+      notifications: true
+    });
+
+    this.send(res, 'notifications on');
+  });
 
 };

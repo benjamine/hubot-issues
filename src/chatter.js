@@ -26,6 +26,31 @@ Chatter.prototype.respond = function(expression, handler) {
   });
 };
 
+Chatter.prototype.matches = function(expression, text) {
+  var self = this;
+  if (Array.isArray(expression)) {
+    for (var i = 0; i < expression.length; i++) {
+      if (self.matches(expression[i], text)) {
+        return true;
+      }
+    }
+    return false;
+  }
+  if (typeof expression === 'string') {
+    if (!this.language) {
+      this.loadLanguage();
+    }
+    if (this.language.hear && this.language.hear[expression]) {
+      var regexes = this.language.hear[expression].map(function(regex){
+        return new RegExp(regex, 'i');
+      });
+      return self.matches(regexes, text);
+    }
+  }
+
+  return expression.test(text);
+};
+
 Chatter.prototype.hear = function(expression, handler) {
   var self = this;
   if (Array.isArray(expression)) {
@@ -34,7 +59,19 @@ Chatter.prototype.hear = function(expression, handler) {
     });
     return;
   }
-  this.robot.hear(expression, function(res) {
+  if (typeof expression === 'string') {
+    if (!this.language) {
+      this.loadLanguage();
+    }
+    if (this.language.hear && this.language.hear[expression]) {
+      var regexes = this.language.hear[expression].map(function(regex){
+        return new RegExp(regex, 'i');
+      });
+      return self.hear(regexes, handler);
+    }
+  }
+
+  return this.robot.hear(expression, function(res) {
     var args = res.match.slice();
     args[0] = res;
     handler.apply(self, args);
@@ -144,14 +181,19 @@ function compileTemplate(text) {
   return _.template(text);
 }
 
-Chatter.prototype.renderMessage = function(res, message, data) {
-  if (!this.templates) {
-    this.templates = yaml.safeLoad(fs.readFileSync(path.join(__dirname, 'messages.yaml'), 'utf8'));
-    for (var name in this.templates) {
-      this.templates[name] = this.templates[name].map(compileTemplate);
-    }
+Chatter.prototype.loadLanguage = function(name) {
+  this.language = yaml.safeLoad(fs.readFileSync(path.join(
+    __dirname, 'languages', (name || 'default') + '.yaml'), 'utf8'));
+  for (var key in this.language.answer) {
+    this.language.answer[key] = this.language.answer[key].map(compileTemplate);
   }
-  var templateList = this.templates[message];
+};
+
+Chatter.prototype.renderMessage = function(res, message, data) {
+  if (!this.language) {
+    this.loadLanguage();
+  }
+  var templateList = this.language.answer[message];
   var template;
   if (templateList) {
     template = templateList[Math.floor(Math.random(templateList.length))];
