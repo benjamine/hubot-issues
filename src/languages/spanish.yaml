@@ -1,19 +1,19 @@
 hear:
   that might be a bug:
-    - "(?:that|this|it) (?:looks like|seems|could be|is|might be) a bug$"
-    - "(?:it seems|maybe|I see|it seems|it looks(?: like)?)? ?(.*) (?:is|are|seems?|looks?)? broken\\??$"
+    - "est?o (?:parece ser|pareciera|parece|es|podria ser|seria) un bug$"
+    - "(?:parece|quizas|veo)? ?(.*) (?:parece estar|se ve|esta|parece)? roto\\??$"
   yes, please, how?:
-    - "(yes|yes, please|please|how\\?|would you\\?|nice|go ahead|can you\\?)$"
+    - "(si|claro|bueno|si, por favor|por favor|como\\?|podrias\\?|bien|gracias|adelante|dime\\?)$"
   how do I track bugs?:
-    - "how (do|can) (I|you|we) (track|log|add|file|register|create) (issues|bugs|an issue|a bug|a blocker)\\??$"
+    - "como (hago|hacemos|se hace)( para)? (cargar|trackear|loguear|agregar|registrar|crear|abrir) (issues|bugs|un issue|un bug)\\??$"
   I found a bug:
-    - "(?:I )?(?:have|found|see|this is|here's) (?:a bug|an issue|a blocker)(?:[, ]+)?([\\s\\S]+)$"
+    - "(?:encontre|tengo|hay) (?:un|este) bug(?:[, ]+)?([\\s\\S]+)$"
   what's broken?:
-    - "^(?:any )?blockers\\?$"
-    - "^what's (?:broken|to be fixed|pending)\\??$"
-    - "^(?:list|any|is there any|do we have|give me|which are)?(?: the| our)? ?(?:(.+)? )?(?:bugs|issues)\\??$"
+    - "^(?:algun )?(?:blockers?|impedimentos?)\\?$"
+    - "^que (?:esta|hay|tenemos) (?:roto|para arreglar|pendiente)\\??$"
+    - "^(?:lista|algun|hay algun|tenemos|dime|cuales son)?(?: los| nuestros)? (?:bugs|issues)(?: (.+)?)?\\??$"
   what can I do next?:
-    - "^(?:what|which)(?: issues?| bugs?| blockers?) can I (?:fix|do|work on)(?: next| now)?\\??$"
+    - "^(?:what|which)(?: issues?| bugs?) can I (?:fix|do|work on)(?: next| now)?\\??$"
     - "^(?:(?:what|which) are )?my (?:issues|bugs)\\??$"
   I'm fixing that:
     - "^\\#?(\\d+|that|it)( is|'s) mine$"
@@ -61,61 +61,61 @@ hear:
 
 answer:
   maybe you found a bug on:
-    - maybe you found a bug on "<%= thing %>"? do you wan't me to track it?
+    - quizás encontraste un bug en "<%= thing %>"? querés que lo que registre?
   maybe you found a bug:
-    - maybe you found a bug? do you wan't me to track it?
+    - quizás encontraste un bug? querés que lo que registre?
   say I found a bug:
-    - just say "I found a bug, <a good concise description>"
+    - escribí "tengo un bug, <una descripción breve>"
   issue created:
-    - "nice catch @<%= user %>!, tracked as #<%= issue.id %>"
+    - "buena @<%= user %>!, registrado como #<%= issue.id %>"
   issue not found:
-    - "there's no issue #<%= id %>, are you sure that's the number?"
+    - "no recuerdo ningún #<%= id %>, ese es el número correcto?"
   issue not found in context:
-    - "sorry, which you mean by '<%= ref %>'?"
+    - "perdón, a que te referís con '<%= ref %>'?"
   issue assigned:
-    - "good luck with that"
+    - "buena suerte con eso"
   issue unassigned:
-    - "no problem, someone else will volunteer"
+    - "no hay problema, alguien lo va a tomar"
   issue already assigned to you:
-    - "yes, we know that"
+    - "si, ya sabemos"
   issue already not assigned to you:
-    - "who said you were?"
+    - "quién dijo que estabas?"
   issue already assigned to someone else:
-    - "wait! @<%= issue.assignee %> is already doing that"
+    - "espera! @<%= issue.assignee %> ya esta haciendo eso"
   issue was being fixed by someone else:
-    - "I thought @<%= issue.assignee %> was doing that"
+    - "pensé que @<%= issue.assignee %> estaba con eso"
   cannot assign, issue not pending:
-    - "#<%= issue.id %> is already <%= issue.state %>"
+    - "#<%= issue.id %> ya está <%= issue.state %>"
   cannot fix, issue not pending:
-    - "#<%= issue.id %> is already <%= issue.state %>"
+    - "#<%= issue.id %> ya está <%= issue.state %>"
   cannot reject, issue not fixed:
-    - "#<%= issue.id %> is not fixed, it's <%= issue.state %>"
+    - "#<%= issue.id %> no está resuelto, está <%= issue.state %>"
   cannot verify, issue not fixed:
-    - "#<%= issue.id %> is not fixed, it's <%= issue.state %>"
+    - "#<%= issue.id %> no está resuelto, está <%= issue.state %>"
   issue fixed:
-    - "sweet, <% if (pendingIssues.length) {%>only <%= pendingIssues.length %> more to go!<%} else {%>that was the last one!<%}%>. @<%= issue.author %> can you verify? (#<%= issue.id %> <%= issue.description %>)"
+    - "excelente!, <% if (pendingIssues.length) {%>sólo quedan <%= pendingIssues.length %>!<%} else {%>ese era el último!<%}%>. @<%= issue.author %> podés verificar? (#<%= issue.id %> <%= issue.description %>)"
   issue fixed by author:
-    - "sweet!, you did it yourself"
+    - "excelente!, lo arreglaste para vos"
   rejected fix:
-    - "oops!, #<%= issue.id %> is going to need more fixing @<%= issue.assignee %>"
+    - "ups!, #<%= issue.id %> no está listo todavía @<%= issue.assignee %>"
   rejected fix, no reason:
-    - "oops!, @<%= user %> can you give your reason for rejecting?"
+    - "ups!, @<%= user %> podés dar tu razón para rechazarlo?"
   rejected fix, got reason:
-    - "got it, #<%= issue.id %> is going to need more fixing @<%= issue.assignee %>"
+    - "listo, #<%= issue.id %> no está listo todavía @<%= issue.assignee %>"
   rejected your fix:
-    - "oops!, no problem, let me know when it's fixed"
+    - "ups!, no hay problema, avisame cuando este resuelto"
   verified fix:
-    - "great news!, @<%= issue.assignee %> good work fixing #<%= issue.id %> <%= issue.description %>"
+    - "bravo!, @<%= issue.assignee %> buen trabajo con #<%= issue.id %> <%= issue.description %>"
   only author can verify:
-    - "that's great, but I'll wait for @<%= issue.author %> to verify that"
+    - "buenisimo, pero voy a esperar que @<%= issue.author %> lo verifique"
   issue deleted:
-    - "#<%= issue.id %> is gone (<%= issue.description %> by @<%= issue.author %>)"
+    - "#<%= issue.id %> eliminado (<%= issue.description %> por @<%= issue.author %>)"
   issues deleted:
-    - "<%= count %> issue(s) deleted"
+    - "<%= count %> issue(s) eliminado(s)"
   issue deleted by author:
-    - "#<%= issue.id %> is gone"
+    - "#<%= issue.id %> eliminado"
   issue duplicate deleted:
-    - "got it, #<%= duplicate.id %> is gone, added @<%= duplicate.author %> comment to #<%= issue.id %>"
+    - "listo, #<%= duplicate.id %> eliminado, agregue el comentario de @<%= duplicate.author %> a #<%= issue.id %>"
   issue duplicate of itself?:
     - "ehm, do you see your own doppelgänger when looking at a mirror?"
   duplicate of which?:

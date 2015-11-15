@@ -3,7 +3,7 @@
 
 var path = require('path');
 module.exports = function loadRobot(robot, scripts) {
-  var scriptsPath = path.resolve(__dirname);
+  var scriptsPath = path.join(path.resolve(__dirname), 'scripts');
   [
     'issues'
   ].forEach(function(script){

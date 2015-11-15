@@ -13,21 +13,18 @@ module.exports = function(robot) {
     hubot utilities
     ===============
 
-    demo page:
-      - run on a web page, localstorage brain?, use a mock robot
-
     response templates:
       - command to load another yaml file (robot "moods")
 
   */
 
   var _ = require('lodash');
-  var BrainRepo = require('./brain-repo');
+  var BrainRepo = require('../brain-repo');
   var repo = new BrainRepo(robot, { key: 'hubotissues' });
   var settingsRepo = new BrainRepo(robot, { key: 'hubotissuessettings' });
-  var Chatter = require('./chatter');
+  var Chatter = require('../chatter');
   var chatter = new Chatter(robot);
-  var descriptionAnalyzer = require('./description-analyzer');
+  var descriptionAnalyzer = require('../description-analyzer');
 
   /* introduction */
 
@@ -46,6 +43,7 @@ module.exports = function(robot) {
 
   chatter.hear('yes, please, how?', function(res) {
     if (this.getReplyContext(res, 'maybefoundabug')) {
+      this.deleteReplyContext(res, 'maybefoundabug');
       this.send(res, 'say I found a bug');
     }
   });

@@ -9,4 +9,4 @@ global.hubotIssues = (typeof window !== 'undefined' ? window.hubotIssues : null)
 
 require('coffee-script');
 var HubotTestHelper = require('hubot-test-helper');
-global.testbot = new HubotTestHelper('../../src/issues.js');
+global.testbot = new HubotTestHelper('../../src/scripts/issues.js');

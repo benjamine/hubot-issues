@@ -94,6 +94,14 @@ Chatter.prototype.setContext = function(key, value, duration) {
   return entry;
 };
 
+Chatter.prototype.deleteContext = function(key) {
+  var entry = this.getContext(key);
+  if (entry) {
+    entry.expiration = new Date().getTime() - 1;
+  }
+  return entry;
+};
+
 Chatter.prototype.getContext = function(key) {
   var match;
   var matchLength = 0;
@@ -145,6 +153,17 @@ Chatter.prototype.setReplyContext = function(message, name, value, duration) {
   }, value, duration || 30000);
 };
 
+Chatter.prototype.deleteReplyContext = function(message, name) {
+  if (message.message) {
+    message = message.message;
+  }
+  return this.deleteContext({
+    user: message.user.name,
+    room: message.room,
+    name: name,
+  });
+};
+
 Chatter.prototype.getReplyContext = function(message, name) {
   if (message.message) {
     message = message.message;
@@ -166,6 +185,16 @@ Chatter.prototype.setRoomContext = function(message, name, value, duration) {
   }, value, duration || 30000);
 };
 
+Chatter.prototype.deleteRoomContext = function(message, name) {
+  if (message.message) {
+    message = message.message;
+  }
+  return this.deleteContext({
+    room: message.room,
+    name: name,
+  });
+};
+
 Chatter.prototype.getRoomContext = function(message, name) {
   if (message.message) {
     message = message.message;
@@ -182,8 +211,9 @@ function compileTemplate(text) {
 }
 
 Chatter.prototype.loadLanguage = function(name) {
+  name = name || process.env.HUBOT_ISSUES_LANGUAGE || 'default';
   this.language = yaml.safeLoad(fs.readFileSync(path.join(
-    __dirname, 'languages', (name || 'default') + '.yaml'), 'utf8'));
+    __dirname, 'languages', name + '.yaml'), 'utf8'));
   for (var key in this.language.answer) {
     this.language.answer[key] = this.language.answer[key].map(compileTemplate);
   }
