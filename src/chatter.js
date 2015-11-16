@@ -89,7 +89,6 @@ Chatter.prototype.setContext = function(key, value, duration) {
     value: value,
     expiration: new Date().getTime() + duration
   };
-
   this.context.push(entry);
   return entry;
 };
@@ -106,12 +105,26 @@ Chatter.prototype.getContext = function(key) {
   var match;
   var matchLength = 0;
   var exactMatchLength = Object.keys(key).length;
-  var now = new Date().getTime();
+  var robot = this.robot;
+
+  function currentTime() {
+    // time shift used when unit testing
+    var timeShift = robot.timeHasShifted && robot.brain.get('timeShift') || 0;
+    return new Date().getTime() + timeShift;
+  }
+
+  var now = currentTime();
 
   function isMatch(entry) {
     for (var name in entry.key) {
-      if (entry.key[name] !== key[name]) {
-        return false;
+      if (name === 'room') {
+        if (entry.key[name].toLowerCase() !== (key[name] || '').toLowerCase()) {
+          return false;
+        }
+      } else {
+        if (entry.key[name] !== key[name]) {
+          return false;
+        }
       }
     }
     return true;
@@ -231,8 +244,10 @@ Chatter.prototype.renderMessage = function(res, message, data) {
     template = compileTemplate(message);
   }
   data = data || {};
-  data.user = data.user || res.message.user.name;
-  data.room = data.room || res.message.room;
+  if (res) {
+    data.user = data.user || res.message.user.name;
+    data.room = data.room || res.message.room;
+  }
   var output = template(data).trim();
   return output;
 };

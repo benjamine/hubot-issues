@@ -9,15 +9,6 @@
 //
 module.exports = function(robot) {
 
-  /* TODO:
-    hubot utilities
-    ===============
-
-    response templates:
-      - command to load another yaml file (robot "moods")
-
-  */
-
   var _ = require('lodash');
   var BrainRepo = require('../brain-repo');
   var repo = new BrainRepo(robot, { key: 'hubotissues' });
@@ -107,6 +98,33 @@ module.exports = function(robot) {
     this.setRoomContext(res, 'issueid', issue.id);
     saveRoomSettings(res.message.room, { notifications: true });
     this.send(res, 'issue created', { issue: issue });
+  });
+
+  robot.router.post('/hubot/issues', function(req, res)  {
+    var data = req.body.payload ? JSON.parse(req.body.payload) : req.body;
+    var token = data.token || req.query.token;
+    if (process.env.HUBOT_ISSUES_HTTP_TOKEN && process.env.HUBOT_ISSUES_HTTP_TOKEN !== token) {
+      res.send(403, 'Not Authorized');
+      return;
+    }
+    if (!data.description) {
+      res.send(400, 'description is required');
+    }
+
+    var issue = repo.create({
+      description: data.description,
+      author: data.author || 'anonymous',
+      createdAt: currentTime(),
+      lastMentionAt: currentTime(),
+      state: 'pending'
+    });
+    if (data.room) {
+      chatter.setRoomContext({ room: data.room }, 'issueid', issue.id);
+      saveRoomSettings(data.room, { notifications: true });
+      robot.messageRoom(data.room, chatter.renderMessage(null, 'issue created from http' +
+        (data.author ? '' : ' anonymous'), { issue: issue }));
+    }
+    res.send(201, 'Created');
   });
 
   /* listing */
@@ -765,7 +783,7 @@ module.exports = function(robot) {
       return;
     }
     this.setRoomContext(res, 'issueid', issue.id);
-    if (issue.author !== res.message.user.name) {
+    if (issue.author !== 'anonymous' && issue.author !== res.message.user.name) {
       this.send(res, 'only author can verify', { issue: issue });
     }
     if (issue.state !== 'fixed') {
@@ -777,6 +795,15 @@ module.exports = function(robot) {
     issue.lastMentionAt = currentTime();
     repo.update(issue);
     this.send(res, 'verified fix', { issue: issue });
+
+    if (!this.getContext({ name: 'garbageCollected'})) {
+      this.setContext({ name: 'garbageCollected'}, true, 12 * 60 * 60000);
+      repo.deleteAll(function(issue) {
+        // delete verified issues after 24hs
+        return issue.state === 'verified' && hoursSince(issue.lastMentionAt) > 24;
+      });
+    }
+
   });
 
   /* delete */
@@ -813,7 +840,7 @@ module.exports = function(robot) {
 
   function currentTime() {
     // time shift used when unit testing
-    var timeShift = robot.brain.get('timeShift') || 0;
+    var timeShift = robot.timeHasShifted && robot.brain.get('timeShift') || 0;
     return new Date().getTime() + timeShift;
   }
 
@@ -830,16 +857,27 @@ module.exports = function(robot) {
     /^.*$/i,
   ], function(res) {
 
+    if (this.getContext({ name: 'noNotifications'})) {
+      return;
+    }
+
     var roomSettings = getRoomSettings(res.message.room);
     if (!roomSettings.notifications) {
       return;
     }
 
-    var user = res.message.user.name;
     var issues = repo.filter(function(issue){
-      if (issue.state === 'verified') {
-        return;
-      }
+      return issue.state !== 'verified' && hoursSince(issue.lastMentionAt) > 4;
+    });
+
+    if (!issues.length) {
+      // no issues to notify about, don't look again for 30min
+      this.setContext({ name: 'noNotifications'}, true, 30 * 1000);
+      return;
+    }
+
+    var user = res.message.user.name;
+    issues = issues.filter(function(issue){
       var hoursSinceLastMention = hoursSince(issue.lastMentionAt);
       if (issue.state === 'fixed' && issue.author === user && hoursSinceLastMention > 4) {
         return true;
@@ -895,20 +933,16 @@ module.exports = function(robot) {
   /* settings */
 
   chatter.hear('no notifications here', function(res) {
-
     saveRoomSettings(res.message.room, {
       notifications: false
     });
-
     this.send(res, 'notifications off');
   });
 
   chatter.hear('do notifications here', function(res) {
-
     saveRoomSettings(res.message.room, {
       notifications: true
     });
-
     this.send(res, 'notifications on');
   });
 

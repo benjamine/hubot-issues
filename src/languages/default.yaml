@@ -7,7 +7,7 @@ hear:
   how do I track bugs?:
     - "how (do|can) (I|you|we) (track|log|add|file|register|create) (issues|bugs|an issue|a bug|a blocker)\\??$"
   I found a bug:
-    - "(?:I )?(?:have|found|see|this is|here's) (?:a bug|an issue|a blocker)(?:[, ]+)?([\\s\\S]+)$"
+    - "(?:I |we )?(?:have|found|see|saw|check|this is|here's) (?:a|an|this) (?:bug|issue|blocker)(?:[, ]+)?([\\s\\S]+)$"
   what's broken?:
     - "^(?:any )?blockers\\?$"
     - "^what's (?:broken|to be fixed|pending)\\??$"
@@ -68,6 +68,10 @@ answer:
     - just say "I found a bug, <a good concise description>"
   issue created:
     - "nice catch @<%= user %>!, tracked as #<%= issue.id %>"
+  issue created from http:
+    - "I got a new issue from @<%= issue.author %>, <%= issue.description %>, tracked as #<%= issue.id %>"
+  issue created from http anonymous:
+    - "I got a new issue, <%= issue.description %>, tracked as #<%= issue.id %>"
   issue not found:
     - "there's no issue #<%= id %>, are you sure that's the number?"
   issue not found in context:

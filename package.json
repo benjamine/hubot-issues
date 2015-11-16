@@ -4,7 +4,7 @@
   "description": "hubot issue tracker",
   "main": "./src/main",
   "scripts": {
-    "chat": "npm i && coffee ./node_modules/.bin/hubot",
+    "chat": "npm i && nodemon ./node_modules/.bin/coffee ./node_modules/.bin/hubot",
     "test": "gulp test",
     "bump": "gulp bump",
     "watch": "gulp watch",
@@ -34,7 +34,8 @@
     "gulp": "^3.8.8",
     "hubot": "^2.17.0",
     "hubot-test-helper": "^1.0.0",
-    "istanbul": "^0.3.2"
+    "istanbul": "^0.3.2",
+    "nodemon": "^1.8.1"
   },
   "dependencies": {
     "lodash": "^3.10.1",

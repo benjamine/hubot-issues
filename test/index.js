@@ -142,12 +142,14 @@ describe('hubotIssues', function(){
         break;
     }
 
-    var brain = this.room.robot.brain;
+    var robot = this.room.robot;
+    var brain = robot.brain;
     var totalTime = quantity * unitSeconds * 1000;
     return function() {
       return new Promise(function(resolve) {
-        var currentTimeShift = brain.get('timeShift') || 0;
+        var currentTimeShift = robot.timeHasShifted && brain.get('timeShift') || 0;
         brain.set('timeShift', currentTimeShift + totalTime);
+        robot.timeHasShifted = true;
         log(quantity + ' ' + unit + '(s) later');
         resolve();
       });
