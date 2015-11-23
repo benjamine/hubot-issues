@@ -175,6 +175,10 @@ module.exports = function(robot) {
       type = '';
     }
 
+    if (type === 'my' || / my$/i.test(type)) {
+      return;
+    }
+
     if (/delete/.test(type)) {
       // this is a delete command
       return;
@@ -194,6 +198,10 @@ module.exports = function(robot) {
     });
 
     if (issues.length < 1) {
+      if (!type || /^(pending|all)$/i.test(type)) {
+        this.send(res, 'no more issues');
+        return;
+      }
       this.send(res, 'list empty', { type: type });
       return;
     }
@@ -229,6 +237,9 @@ module.exports = function(robot) {
 
   chatter.hear('I\'m fixing that', function(res, id) {
 
+    if (!id) {
+      id = 'that';
+    }
     if (['that', 'it'].indexOf(id.toLowerCase()) >= 0) {
       var context = this.getRoomContext(res, 'issueid');
       if (context && context.value) {

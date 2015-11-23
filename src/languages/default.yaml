@@ -19,6 +19,8 @@ hear:
     - "^\\#?(\\d+|that|it)( is|'s) mine$"
     - "^(?:I'm )?(?:fixing|doing|taking care of|killing|with|on) \\#?(\\d+|that|it)$"
     - "^I(?:'ll| will| can)? (?:fix|do|take care of|kill|try|debug|see|check) \\#?(\\d+|that|it)$"
+    - "challenge accepted"
+    - "consider (it|that) done"
   I'm not fixing that:
     - "^(?:I'm )?not (?:fixing|doing|taking care of|killing|with|on) \\#?(\\d+|that|it)(?: anymore)?$"
     - "^(?:I )?(?:won't|can't) (?:fix|do|take care of|kill|try|debug|see|check) \\#?(\\d+|that|it)(?: anymore)?$"
@@ -146,6 +148,16 @@ answer:
     - "- <%= text %>"
   list empty:
     - "no <%= (type && (type + ' ') || '') %>issues"
+  no more issues:
+    - no more issues, you humans are awesome!
+    - no more issues, you're not breaking things fast enough
+    - no more issues, you can go plant a book
+    - no more issues, you can go read a tree
+    - no more issues, a cup is useful only when it is empty; and a mind that is filled with beliefs, with dogmas, with assertions, with quotations, is really an uncreative mind, it is merely a repetitive mind.
+    - no more issues, is this good... or bad?
+    - no more issues, no bugs is no work safety!
+    - no more issues, http://youtu.be/XRTlppgzl34
+    - no more issues, does a bug exists if it has never been observed?
   your list empty:
     - "sorry, I have nothing for you"
   list group:

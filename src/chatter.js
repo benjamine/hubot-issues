@@ -239,7 +239,7 @@ Chatter.prototype.renderMessage = function(res, message, data) {
   var templateList = this.language.answer[message];
   var template;
   if (templateList) {
-    template = templateList[Math.floor(Math.random(templateList.length))];
+    template = templateList[Math.floor(Math.random() * templateList.length)];
   } else {
     template = compileTemplate(message);
   }
