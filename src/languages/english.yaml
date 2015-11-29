@@ -10,6 +10,8 @@ hear:
     - "how (do|can) (I|you|we) (track|log|add|file|register|create) (issues|bugs|an issue|a bug|a blocker)\\??$"
   I found a bug:
     - "(?:I |we )?(?:have|found|see|saw|check|this is|here's) (?:a|an|this) (?:bug|issue|blocker)(?:[, ]+)?([\\s\\S]+)$"
+  that's from someone else:
+    - "^\\#?(\\d+|that|it)(?:\\sis|\\swas|'s) (?:from |(?:found |reported )?by )@?(\\S+)$"
   what's broken?:
     - "^(?:any )?blockers\\?$"
     - "^what's (?:broken|to be fixed|pending)\\??$"
@@ -78,6 +80,10 @@ answer:
     - "I got a new issue from @<%= issue.author %>, <%= issue.description %>, tracked as #<%= issue.id %>"
   issue created from http anonymous:
     - "I got a new issue, <%= issue.description %>, tracked as #<%= issue.id %>"
+  issue already authored that person:
+    - "yes, we know that"
+  issue author changed:
+    - "ok, #<%= issue.id %> author is now @<%= issue.author %>"
   issue not found:
     - "there's no issue #<%= id %>, are you sure that's the number?"
   issue not found in context:

@@ -127,6 +127,49 @@ module.exports = function(robot) {
     res.send(201, 'Created');
   });
 
+  /* change ownership */
+
+  chatter.hear('that\'s from someone else', function(res, id, author){
+    if (!id) {
+      id = 'that';
+    }
+    if (['that', 'it'].indexOf(id.toLowerCase()) >= 0) {
+      var context = this.getRoomContext(res, 'issueid');
+      if (context && context.value) {
+        id = context.value;
+      } else {
+        this.send(res, 'issue not found in context', { ref: id });
+        return;
+      }
+    }
+
+    if (/^(me|myself)$/i.test(author)) {
+      author = res.message.user.name;
+    }
+
+    var issue = repo.get(+id);
+    if (!issue) {
+      this.send(res, 'issue not found', { id: id });
+      return;
+    }
+    if (issue.author === author) {
+      this.send(res, 'issue already authored by that person', { issue: issue });
+      return;
+    }
+    issue.author = author;
+    issue.lastMentionAt = currentTime();
+    repo.update(issue);
+    this.setRoomContext(res, 'issueid', issue.id);
+    if (issue.state === 'fixed') {
+      var pendingIssues = repo.filter(function(issue) {
+        return issue.state === 'pending';
+      });
+      this.send(res, 'issue fixed', { issue: issue, pendingIssues: pendingIssues });
+    } else {
+      this.send(res, 'issue author changed', { issue: issue });
+    }
+  });
+
   /* listing */
 
   function formatList(res, issues) {

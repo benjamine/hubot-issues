@@ -23,6 +23,40 @@ track new issues:
               description: jetpack is not starting
               author: rachael
               state: pending
+  transfer ownership:
+    to someone else:
+      - rachael> I found a bug, jetpack is not starting
+      - "hubot> nice catch @rachael!, tracked as #1"
+      - rachael> that was found by @pris
+      - "hubot> ok, #1 author is now @pris"
+      -
+        brain:
+          hubotissues:
+            -
+              id: 1
+              description: jetpack is not starting
+              author: pris
+              state: pending
+    to myself:
+      - rachael> I found a bug, jetpack is not starting
+      - "hubot> nice catch @rachael!, tracked as #1"
+      - pris> that's from me
+      - "hubot> ok, #1 author is now @pris"
+      -
+        brain:
+          hubotissues:
+            -
+              id: 1
+              description: jetpack is not starting
+              author: pris
+              state: pending
+    when already fixed:
+      - rachael> I found a bug, jetpack is not starting
+      - "hubot> nice catch @rachael!, tracked as #1"
+      - "zhora> fixed that"
+      - hubot> sweet, that was the last one!. @rachael can you verify? (#1 jetpack is not starting)
+      - pris> that's from me
+      - hubot> sweet, that was the last one!. @pris can you verify? (#1 jetpack is not starting)
   bad descriptions:
     hubot asks for better descriptions:
       - rachael> I found a bug, jetpack is broken
