@@ -1,4 +1,7 @@
 function brainCleanup(data) {
+
+  // delete parts of data that we don't want to compare to fixtures
+
   if (Array.isArray(data)) {
     data.forEach(brainCleanup);
     return data;

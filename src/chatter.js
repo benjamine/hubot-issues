@@ -5,25 +5,69 @@ var yaml = require('js-yaml');
 
 function Chatter(robot) {
   this.robot = robot;
-
+  this.listeners = [];
+  this.languageSpecificListeners = [];
   this.context = [];
 }
 
 module.exports = Chatter;
 
 Chatter.prototype.respond = function(expression, handler) {
+  return this.hear(expression, handler, true);
+};
+
+Chatter.prototype.hear = function(expression, handler, respond) {
   var self = this;
   if (Array.isArray(expression)) {
-    expression.forEach(function(expr){
-      self.respond(expr, handler);
+    return expression.map(function(expr){
+      return self.hear(expr, handler, respond);
     });
-    return;
   }
-  this.robot.respond(expression, function(res) {
+
+  if (typeof expression === 'string') {
+    if (!this.language) {
+      this.loadLanguage();
+    }
+    if (this.language.hear && this.language.hear[expression]) {
+      var regexes = this.language.hear[expression].map(function(regex) {
+        return new RegExp(regex, 'i');
+      });
+      var languageListeners = self.hear(regexes, handler, respond);
+      if (languageListeners) {
+        // remember language-specific listeners to replace them on language change
+        this.languageSpecificListeners.push({
+          expression: expression,
+          handler: handler,
+          respond: respond,
+          listeners: languageListeners
+        });
+      }
+      return languageListeners;
+    }
+  }
+
+  if (typeof expression === 'string') {
+    if (/^@?hubot/i.test(expression)) {
+      respond = true;
+      expression = expression.replace(/^@?hubot:?\s*/i, '');
+    }
+  } else {
+    var expressionSource = expression.source;
+    if (/^\^?@?hubot/i.test(expressionSource)) {
+      respond = true;
+      expression = new RegExp(expressionSource.replace(/^@?hubot:?\s*/i, ''),
+          expression.ignoreCase ? 'i' : '');
+    }
+  }
+
+  this.robot[respond ? 'respond' : 'hear'](expression, function(res) {
     var args = res.match.slice();
     args[0] = res;
     handler.apply(self, args);
   });
+  var listener = this.robot.listeners[this.robot.listeners.length - 1];
+  this.listeners.push(listener);
+  return listener;
 };
 
 Chatter.prototype.matches = function(expression, text) {
@@ -51,31 +95,22 @@ Chatter.prototype.matches = function(expression, text) {
   return expression.test(text);
 };
 
-Chatter.prototype.hear = function(expression, handler) {
-  var self = this;
-  if (Array.isArray(expression)) {
-    expression.forEach(function(expr){
-      self.hear(expr, handler);
-    });
+Chatter.prototype.removeListeners = function() {
+  var robotListeners = this.robot.listeners;
+  if (!robotListeners || !robotListeners.length) {
     return;
   }
-  if (typeof expression === 'string') {
-    if (!this.language) {
-      this.loadLanguage();
+  this.listeners.forEach(function(listener) {
+    for (var i = 0; i < robotListeners.length; i++) {
+      var robotListener = robotListeners[i];
+      if (listener === robotListener) {
+        robotListeners.splice(i, 1);
+        i--;
+      }
     }
-    if (this.language.hear && this.language.hear[expression]) {
-      var regexes = this.language.hear[expression].map(function(regex){
-        return new RegExp(regex, 'i');
-      });
-      return self.hear(regexes, handler);
-    }
-  }
-
-  return this.robot.hear(expression, function(res) {
-    var args = res.match.slice();
-    args[0] = res;
-    handler.apply(self, args);
   });
+  this.listeners.length = 0;
+  this.languageSpecificListeners.length = 0;
 };
 
 Chatter.prototype.setContext = function(key, value, duration) {
@@ -225,11 +260,43 @@ function compileTemplate(text) {
 
 Chatter.prototype.loadLanguage = function(name) {
   name = name || process.env.HUBOT_ISSUES_LANGUAGE || 'default';
+  if (this.language && this.language.name === name) {
+    return;
+  }
   this.language = yaml.safeLoad(fs.readFileSync(path.join(
     __dirname, 'languages', name + '.yaml'), 'utf8'));
   for (var key in this.language.answer) {
     this.language.answer[key] = this.language.answer[key].map(compileTemplate);
   }
+  this.language.name = name;
+
+  if (this.languageSpecificListeners.length) {
+    // reload listeners using the new language
+    var self = this;
+    this.languageSpecificListeners.forEach(function(current) {
+      var newListeners = self.hear(current.expression,
+        current.handler, current.respond);
+      // replace existing listener with the new ones
+      self.replaceListeners(current.listeners, newListeners);
+    });
+  }
+};
+
+Chatter.prototype.replaceListeners = function(current, replace) {
+  var spliceArgs = replace.slice();
+  var listeners = this.robot.listeners;
+  var startAt = listeners.length;
+  for (var i = listeners.length - 1; i >= 0; i--) {
+    var listener = listeners[i];
+    if (current.indexOf(listener) >= 0) {
+      listeners.splice(i, 1);
+      startAt = i;
+    } else if (replace.indexOf(listener) >= 0) {
+      listeners.splice(i, 1);
+    }
+  }
+  spliceArgs.unshift(startAt, 0);
+  listeners.splice.apply(listeners, spliceArgs);
 };
 
 Chatter.prototype.renderMessage = function(res, message, data) {

@@ -957,4 +957,13 @@ module.exports = function(robot) {
     this.send(res, 'notifications on');
   });
 
+  chatter.hear('hubot speak in language', function(res, lang) {
+    try {
+      chatter.loadLanguage(lang);
+      this.send(res, 'language loaded');
+    } catch (err) {
+      // language not found for this script
+    }
+  });
+
 };

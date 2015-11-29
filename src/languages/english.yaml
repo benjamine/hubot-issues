@@ -1,27 +1,28 @@
 hear:
   hubot speak in language:
-    - "@hubot (?:habla|hablá|escribe|escribi|responde)(?:nos|me)? en (\\w+)"
+    - "@hubot (?:speak|write|chat) (?:to )?(?:us |me )?(?:in )?(\\w+)"
   that might be a bug:
-    - "est?o (?:parece ser|pareciera|parece|es|podria ser|seria) un (?:bug|impedimento)$"
-    - "(?:encontre|veo|tengo) un (?:bug|impedimento)$"
-    - "(?:parece|quizas|veo)? ?(.*) (?:parece estar|se ve|esta|parece)? roto\\??$"
+    - "(?:that|this|it) (?:looks like|seems|could be|is|might be) a bug$"
+    - "(?:it seems|maybe|I see|it seems|it looks(?: like)?)? ?(.*) (?:is|are|seems?|looks?)? broken\\??$"
   yes, please, how?:
-    - "(si|claro|bueno|si, por favor|por favor|como\\?|podrias\\?|bien|gracias|adelante|dime\\?)$"
+    - "(yes|yes, please|please|how\\?|would you\\?|nice|go ahead|can you\\?)$"
   how do I track bugs?:
-    - "como (hago|hacemos|se hace)( para)? (cargar|trackear|loguear|agregar|registrar|crear|abrir) (issues|bugs|un issue|un bug)\\??$"
+    - "how (do|can) (I|you|we) (track|log|add|file|register|create) (issues|bugs|an issue|a bug|a blocker)\\??$"
   I found a bug:
-    - "(?:encontre|tengo|hay) (?:un|este) bug(?:[, ]+)?([\\s\\S]+)$"
+    - "(?:I |we )?(?:have|found|see|saw|check|this is|here's) (?:a|an|this) (?:bug|issue|blocker)(?:[, ]+)?([\\s\\S]+)$"
   what's broken?:
-    - "^(?:algun )?(?:blockers?|impedimentos?)\\?$"
-    - "^que (?:esta|hay|tenemos) (?:roto|para arreglar|pendiente)\\??$"
-    - "^(?:lista|algun|hay algun|tenemos|dime|cuales son)?(?: los| nuestros)? (?:bugs|issues)(?: (.+)?)?\\??$"
+    - "^(?:any )?blockers\\?$"
+    - "^what's (?:broken|to be fixed|pending)\\??$"
+    - "^(?:list|any|is there any|do we have|give me|which are)?(?: the| our)? ?(?:(.+)? )?(?:bugs|issues)\\??$"
   what can I do next?:
-    - "^(?:what|which)(?: issues?| bugs?) can I (?:fix|do|work on)(?: next| now)?\\??$"
+    - "^(?:what|which)(?: issues?| bugs?| blockers?) can I (?:fix|do|work on)(?: next| now)?\\??$"
     - "^(?:(?:what|which) are )?my (?:issues|bugs)\\??$"
   I'm fixing that:
     - "^\\#?(\\d+|that|it)( is|'s) mine$"
     - "^(?:I'm )?(?:fixing|doing|taking care of|killing|with|on) \\#?(\\d+|that|it)$"
     - "^I(?:'ll| will| can)? (?:fix|do|take care of|kill|try|debug|see|check) \\#?(\\d+|that|it)$"
+    - "challenge accepted"
+    - "consider (it|that) done"
   I'm not fixing that:
     - "^(?:I'm )?not (?:fixing|doing|taking care of|killing|with|on) \\#?(\\d+|that|it)(?: anymore)?$"
     - "^(?:I )?(?:won't|can't) (?:fix|do|take care of|kill|try|debug|see|check) \\#?(\\d+|that|it)(?: anymore)?$"
@@ -64,63 +65,67 @@ hear:
 
 answer:
   language loaded:
-    - bien, voy a empezar a registrar impedimentos en castellano
+    - ok, I'll track issues in english now
   maybe you found a bug on:
-    - quizás encontraste un bug en "<%= thing %>"? querés que lo que registre?
+    - maybe you found a bug on "<%= thing %>"? do you wan't me to track it?
   maybe you found a bug:
-    - quizás encontraste un bug? querés que lo que registre?
+    - maybe you found a bug? do you wan't me to track it?
   say I found a bug:
-    - escribí "tengo un bug, <una descripción breve>"
+    - just say "I found a bug, <a good concise description>"
   issue created:
-    - "buena @<%= user %>!, registrado como #<%= issue.id %>"
+    - "nice catch @<%= user %>!, tracked as #<%= issue.id %>"
+  issue created from http:
+    - "I got a new issue from @<%= issue.author %>, <%= issue.description %>, tracked as #<%= issue.id %>"
+  issue created from http anonymous:
+    - "I got a new issue, <%= issue.description %>, tracked as #<%= issue.id %>"
   issue not found:
-    - "no recuerdo ningún #<%= id %>, ese es el número correcto?"
+    - "there's no issue #<%= id %>, are you sure that's the number?"
   issue not found in context:
-    - "perdón, a que te referís con '<%= ref %>'?"
+    - "sorry, which you mean by '<%= ref %>'?"
   issue assigned:
-    - "buena suerte con eso"
+    - "good luck with that"
   issue unassigned:
-    - "no hay problema, alguien lo va a tomar"
+    - "no problem, someone else will volunteer"
   issue already assigned to you:
-    - "si, ya sabemos"
+    - "yes, we know that"
   issue already not assigned to you:
-    - "quién dijo que estabas?"
+    - "who said you were?"
   issue already assigned to someone else:
-    - "espera! @<%= issue.assignee %> ya esta haciendo eso"
+    - "wait! @<%= issue.assignee %> is already doing that"
   issue was being fixed by someone else:
-    - "pensé que @<%= issue.assignee %> estaba con eso"
+    - "I thought @<%= issue.assignee %> was doing that"
   cannot assign, issue not pending:
-    - "#<%= issue.id %> ya está <%= issue.state %>"
+    - "#<%= issue.id %> is already <%= issue.state %>"
   cannot fix, issue not pending:
-    - "#<%= issue.id %> ya está <%= issue.state %>"
+    - "#<%= issue.id %> is already <%= issue.state %>"
   cannot reject, issue not fixed:
-    - "#<%= issue.id %> no está resuelto, está <%= issue.state %>"
+    - "#<%= issue.id %> is not fixed, it's <%= issue.state %>"
   cannot verify, issue not fixed:
-    - "#<%= issue.id %> no está resuelto, está <%= issue.state %>"
+    - "#<%= issue.id %> is not fixed, it's <%= issue.state %>"
   issue fixed:
-    - "excelente!, <% if (pendingIssues.length) {%>sólo quedan <%= pendingIssues.length %>!<%} else {%>ese era el último!<%}%>. @<%= issue.author %> podés verificar? (#<%= issue.id %> <%= issue.description %>)"
+    - "sweet, <% if (pendingIssues.length) {%>only <%= pendingIssues.length %> more to go!<%} else {%>that was the last one!<%}%>. @<%= issue.author %> can you verify? (#<%= issue.id %> <%= issue.description %>)"
   issue fixed by author:
-    - "excelente!, lo arreglaste para vos"
+    - "sweet!, you did it yourself"
   rejected fix:
-    - "ups!, #<%= issue.id %> no está listo todavía @<%= issue.assignee %>"
+    - "oops!, #<%= issue.id %> is going to need more fixing @<%= issue.assignee %>"
   rejected fix, no reason:
-    - "ups!, @<%= user %> podés dar tu razón para rechazarlo?"
+    - "oops!, @<%= user %> can you give your reason for rejecting?"
   rejected fix, got reason:
-    - "listo, #<%= issue.id %> no está listo todavía @<%= issue.assignee %>"
+    - "got it, #<%= issue.id %> is going to need more fixing @<%= issue.assignee %>"
   rejected your fix:
-    - "ups!, no hay problema, avisame cuando este resuelto"
+    - "oops!, no problem, let me know when it's fixed"
   verified fix:
-    - "bravo!, @<%= issue.assignee %> buen trabajo con #<%= issue.id %> <%= issue.description %>"
+    - "great news!, @<%= issue.assignee %> good work fixing #<%= issue.id %> <%= issue.description %>"
   only author can verify:
-    - "buenisimo, pero voy a esperar que @<%= issue.author %> lo verifique"
+    - "that's great, but I'll wait for @<%= issue.author %> to verify that"
   issue deleted:
-    - "#<%= issue.id %> eliminado (<%= issue.description %> por @<%= issue.author %>)"
+    - "#<%= issue.id %> is gone (<%= issue.description %> by @<%= issue.author %>)"
   issues deleted:
-    - "<%= count %> issue(s) eliminado(s)"
+    - "<%= count %> issue(s) deleted"
   issue deleted by author:
-    - "#<%= issue.id %> eliminado"
+    - "#<%= issue.id %> is gone"
   issue duplicate deleted:
-    - "listo, #<%= duplicate.id %> eliminado, agregue el comentario de @<%= duplicate.author %> a #<%= issue.id %>"
+    - "got it, #<%= duplicate.id %> is gone, added @<%= duplicate.author %> comment to #<%= issue.id %>"
   issue duplicate of itself?:
     - "ehm, do you see your own doppelgänger when looking at a mirror?"
   duplicate of which?:
@@ -147,6 +152,16 @@ answer:
     - "- <%= text %>"
   list empty:
     - "no <%= (type && (type + ' ') || '') %>issues"
+  no more issues:
+    - no more issues, you humans are awesome!
+    - no more issues, you're not breaking things fast enough
+    - no more issues, you can go plant a book
+    - no more issues, you can go read a tree
+    - no more issues, a cup is useful only when it is empty; and a mind that is filled with beliefs, with dogmas, with assertions, with quotations, is really an uncreative mind, it is merely a repetitive mind.
+    - no more issues, is this good... or bad?
+    - no more issues, no bugs is no work safety!
+    - no more issues, http://youtu.be/XRTlppgzl34
+    - no more issues, does a bug exists if it has never been observed?
   your list empty:
     - "sorry, I have nothing for you"
   list group:
