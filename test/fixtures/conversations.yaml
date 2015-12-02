@@ -304,7 +304,7 @@ issue details:
     - hubot> good luck with that
     - rachael> I found a bug, laser gun is overheating
     - "hubot> nice catch @rachael!, tracked as #2"
-    - rachael> and the trigger is jammed
+    - rachael> also the trigger is jammed
     - "hubot> got it"
     - rachael> that is critical
     - "hubot> #2 is now #critical"

@@ -35,7 +35,7 @@ hear:
     - "^()(?:needs clarification|is unclear|is confusing)(?:[, ]+)?([\\s\\S]+)?$"
     - "^\\#?(\\d+|that|it)(?:'s| is)? (?:needs clarification|unclear|confusing)(?:[, ]+)?([\\s\\S]+)?$"
   about that:
-    - "^()(?:also|and|but)(?:[, ]+)?([\\s\\S]+)?$"
+    - "^()also(?:[, ]+)([\\s\\S]+)?$"
     - "^about \\#?(\\d+|that|it)(?:[, ]+)?([\\s\\S]+)?$"
   that is tag:
     - "^((?:(?:and +)?(?:\\#?\\d+|that|it)(?:[, ]+)?){2,20}) are ([\\w\\d \\-',.#]+)?$"
