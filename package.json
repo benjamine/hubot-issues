@@ -2,6 +2,7 @@
   "name": "hubot-issues",
   "version": "0.0.3",
   "description": "hubot issue tracker",
+  "homepage": "https://github.com/benjamine/hubot-issues",
   "main": "./src/main",
   "scripts": {
     "chat": "npm i && nodemon ./node_modules/.bin/coffee ./node_modules/.bin/hubot",
