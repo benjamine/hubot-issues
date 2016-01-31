@@ -955,6 +955,8 @@ module.exports = function(robot) {
     };
     emailSender.send(message, function(err) {
       if (err) {
+        console.log('[email send error]', err.message);
+        console.log(err.stack);
         self.send(res, 'issue send failed', { issue: issue, message: message, errorMessage: err.message });
         return;
       }
