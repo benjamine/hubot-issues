@@ -30,7 +30,7 @@ EmailSender.prototype.autoconfigure = function () {
       host: process.env.POSTMARK_SMTP_SERVER,
       port: process.env.POSTMARK_SMTP_PORT || process.env.SMTP_PORT || 25,
       domain: process.env.POSTMARK_SMTP_DOMAIN || process.env.SMTP_DOMAIN,
-      ssl: true,
+      ssl: !/^(no|false|0)$/i.test(process.env.SMTP_SSL),
     };
   } else if (process.env.SMTP_SERVER) {
     options = {
@@ -39,7 +39,7 @@ EmailSender.prototype.autoconfigure = function () {
       host: process.env.SMTP_SERVER,
       port: process.env.SMTP_PORT || 25,
       domain: process.env.SMTP_DOMAIN,
-      ssl: /^(no|false|0)$/i.test(process.env.SMTP_SSL),
+      ssl: !/^(no|false|0)$/i.test(process.env.SMTP_SSL),
     };
   }
 
