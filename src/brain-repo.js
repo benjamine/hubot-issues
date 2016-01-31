@@ -79,6 +79,17 @@ BrainRepo.prototype.update = unitOfWork(function(entity) {
   }
 });
 
+BrainRepo.prototype.upsert = function(entity) {
+  var existingEntity;
+  if (entity.id) {
+    existingEntity = this.update(entity);
+    if (existingEntity) {
+      return existingEntity;
+    }
+  }
+  return this.create(entity);
+};
+
 BrainRepo.prototype.delete = unitOfWork(function(entityOrId) {
   var id = entityOrId;
   if (typeof entityOrId === 'object') {

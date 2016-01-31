@@ -10,6 +10,10 @@ introduction:
     hubot explains:
       - rachael> @hubot how do you track issues?
       - hubot> just say "I found a bug, <a good concise description>"
+    or make hubot explain:
+      - rachael> something is not working as it should, please fix it, thanks
+      - zhora> can you report it as a bug, please?
+      - hubot> just say "I found a bug, <a good concise description>"
 track new issues:
   I found ...:
     hubot tracks it:
@@ -237,6 +241,27 @@ fixing an issue:
                   - awful
                   - critical
                   - blocker
+    tag on creation:
+      hubot will find tags in description:
+        - "rachael> I found a bug, jetpack is on fire #critical #danger"
+        - "hubot> nice catch @rachael!, tracked as #2"
+        -
+          brain:
+            hubotissues:
+              -
+                id: 1
+                description: jetpack is not starting
+                author: rachael
+                assignee: zhora
+                state: pending
+              -
+                id: 2
+                description: jetpack is on fire
+                author: rachael
+                state: pending
+                tags:
+                  - critical
+                  - danger
     tagging multiple issues:
       hubot will tag them all:
         - rachael> I found a bug, laser gun is jammed
@@ -432,6 +457,52 @@ delete:
     - rachael> delete verified issues
     - hubot> 2 issue(s) deleted
 
+send to email:
+  before each:
+    - "rachael> I found a bug, jetpack is not starting #critical"
+    - "hubot> nice catch @rachael!, tracked as #1"
+    - "rachael> about that, already trying reset button"
+    - "hubot> got it"
+  send an issue to email address:
+    it's sent and deleted from hubot brain:
+      - rachael> send that to example@domain.com
+      - "hubot> sent"
+      -
+        brain:
+          hubotissues: []
+        outbox:
+          -
+            from: no-reply@localhost
+            to: example@domain.com
+            subject: "[issue] jetpack is not starting #critical"
+            text: |
+              pending, #1 jetpack is not starting #critical, by @rachael
+              - rachael> already trying reset button
+  send an issue to alias:
+    it's sent and deleted from hubot brain:
+      - rachael> send that to bugsquashingmonster@domain.com <bsm>
+      - "hubot> sent"
+      - "rachael> I found a bug, hoverboard is out of battery"
+      - "hubot> nice catch @rachael!, tracked as #1"
+      - rachael> send that to bsm
+      - "hubot> sent"
+      -
+        brain:
+          hubotissues: []
+        outbox:
+          -
+            from: no-reply@localhost
+            to: bugsquashingmonster@domain.com
+            subject: "[issue] jetpack is not starting #critical"
+            text: |
+              pending, #1 jetpack is not starting #critical, by @rachael
+              - rachael> already trying reset button
+          -
+            from: no-reply@localhost
+            to: bugsquashingmonster@domain.com
+            subject: "[issue] hoverboard is out of battery"
+            text: |
+              pending, #1 hoverboard is out of battery, by @rachael
 lists:
   before each:
     # add some bugs
@@ -563,7 +634,7 @@ notifications:
       - pris> hello!
       - zhora> hello!
       - rachael> what's up?
-      - "hubot> @rachael, #1 has been fixed, can you verify please?"
+      - "hubot> @rachael, #1 has been fixed (jetpack is not starting), can you verify please?"
   if a few issues are waiting for you:
     before each:
       - rachael> I found a bug, jetpack is not starting
@@ -587,4 +658,4 @@ notifications:
       - pris> hello!
       - zhora> hello!
       - rachael> what's up?
-      - "hubot> @rachael, we are waiting for you on #1, #2, #3 and #4"
+      - "hubot> @rachael, we are waiting for you on #1, #2, #3 and #4, can you please verify #1 (jetpack is not starting)?"

@@ -8,6 +8,7 @@ hear:
     - "(yes|yes, please|please|how\\?|would you\\?|nice|go ahead|can you\\?)$"
   how do I track bugs?:
     - "how (do|can) (I|you|we) (track|log|add|file|register|create) (issues|bugs|an issue|a bug|a blocker)\\??$"
+    - "(?:please, ?)?(?:can you )?report it as (?:a )?bug(?:,? please?)?\\??$"
   I found a bug:
     - "(?:I |we )?(?:have|found|see|saw|check|this is|here's) (?:a|an|this) (?:bug|issue|blocker)(?:[, ]+)?([\\s\\S]+)$"
   that's from someone else:
@@ -58,6 +59,8 @@ hear:
     - "^(?:delete|kill) \\#?(\\d+|that|it)$"
   delete verified:
     - "^(?:delete|kill) verified (?:issues|bugs)$"
+  send that:
+    - "^send (?:issue |bug )?\\#?(\\d+|that|it) (?:issue |bug )?to ([^ \\<]+) *(?:\\<(.+)\\>)?$"
   no notifications here:
     - "^(?:no|stop|disable|don't send) (?:notifications|messages) (?:here|on this (?:room|channel))(\\s*,\\s*please\\!?)?$"
   do notifications here:
@@ -138,6 +141,10 @@ answer:
     - "duplicate of which?"
   that duplicate of that?:
     - "ehm, can you be more specific?"
+  issue sent:
+    - "sent"
+  issue send failed:
+    - "couldn't not send, <%= errorMessage %>"
   issue needs clarification, what's your question?:
     - "what's your question?"
   issue needs clarification, can author answer?:
@@ -181,9 +188,9 @@ answer:
   issue waiting for your fix:
     - "@<%= user %> are you still working on #<%= issue.id %>? can we help you?"
   issue waiting for your verification:
-    - "@<%= user %>, #<%= issue.id %> has been fixed, can you verify please?"
+    - "@<%= user %>, #<%= issue.id %> has been fixed (<%= issue.description %>), can you verify please?"
   issues waiting for you:
-    - "@<%= user %>, we are waiting for you on <%= issuesList %>"
+    - "@<%= user %>, we are waiting for you on <%= issuesList %>, can you please verify #<%= issue.id %> (<%= issue.description %>)?"
   notifications off:
     - "ok, I won't notify about issues on this room anymore"
   notifications on:

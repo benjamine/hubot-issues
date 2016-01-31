@@ -113,6 +113,24 @@ describe('hubotIssues', function(){
     };
   }
 
+  function outboxCheck(expected) {
+    var emailSender = this.room.robot.emailSender;
+    return function() {
+      return new Promise(function(resolve, reject) {
+        try {
+          expected.forEach(function(expectedMessage, index){
+            var actual = emailSender.outbox[index];
+            expect(actual).to.eql(expectedMessage);
+          });
+        } catch(err) {
+          return reject(err);
+        }
+        log('outbox check OK');
+        resolve();
+      });
+    };
+  }
+
   function shiftTime(quantity, unit) {
     if (/^(a|an)$/i.test(quantity)) {
       quantity = 1;
@@ -190,6 +208,10 @@ describe('hubotIssues', function(){
         if (item.brain) {
           // asset brain data
           nextPromise(brainCheck.call(this, item.brain));
+        }
+        if (item.outbox) {
+          // asset outbox messages
+          nextPromise(outboxCheck.call(this, item.outbox));
         }
         return;
       }

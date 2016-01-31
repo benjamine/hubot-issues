@@ -16,6 +16,12 @@ module.exports = function(robot) {
   var Chatter = require('../chatter');
   var chatter = new Chatter(robot);
   var descriptionAnalyzer = require('../description-analyzer');
+  var EmailSender = require('../email-sender');
+  var emailSender = new EmailSender();
+  if (robot.constructor.name === 'MockRobot') {
+    emailSender.enableTestMode();
+    robot.emailSender = emailSender;
+  }
 
   /* introduction */
 
@@ -78,6 +84,16 @@ module.exports = function(robot) {
     return rooms.list[room];
   }
 
+  function extractTagsFromDescription(description, tags) {
+    description = description.replace(/\#([\w\d\-\_\.\:]+)/gim, function(match, tag) {
+      if (tags.indexOf(tag) < 0) {
+        tags.push(tag);
+      }
+      return '';
+    });
+    return description.replace(/[,; ]*$/, '');
+  }
+
   /* creating */
 
   chatter.hear('I found a bug', function(res, description) {
@@ -88,13 +104,19 @@ module.exports = function(robot) {
       return;
     }
 
-    var issue = repo.create({
+    var tags = [];
+    description = extractTagsFromDescription(description, tags);
+    var issueData = {
       description: description,
       author: res.message.user.name,
       createdAt: currentTime(),
       lastMentionAt: currentTime(),
       state: 'pending'
-    });
+    };
+    if (tags && tags.length) {
+      issueData.tags = tags;
+    }
+    var issue = repo.create(issueData);
     this.setRoomContext(res, 'issueid', issue.id);
     saveRoomSettings(res.message.room, { notifications: true });
     this.send(res, 'issue created', { issue: issue });
@@ -465,7 +487,7 @@ module.exports = function(robot) {
       if (context && context.value) {
         id = context.value;
       } else {
-        this.send(res, 'issue not found in context', { ref: id });
+        // issue not found, might be just an unrelated comment
         return;
       }
     }
@@ -890,6 +912,67 @@ module.exports = function(robot) {
     this.send(res, 'issues deleted', { count: count });
   });
 
+  /* send */
+
+  chatter.hear('send that', function(res, id, to, toAlias) {
+    var self = this;
+
+    if (['that', 'it'].indexOf(id.toLowerCase()) >= 0) {
+      var context = this.getRoomContext(res, 'issueid');
+      if (context && context.value) {
+        id = context.value;
+      } else {
+        this.send(res, 'issue not found in context', { ref: id });
+        return;
+      }
+    }
+
+    var issue = repo.get(+id);
+    if (!issue) {
+      this.send(res, 'issue not found', { id: id });
+      return;
+    }
+    this.setRoomContext(res, 'issueid', issue.id);
+
+    var body = [this.renderMessage(res, 'issue details', { issue: issue, tags: stringifyTags(issue.tags) })];
+    if (issue.log) {
+      issue.log.forEach(function(text){
+        body.push(chatter.renderMessage(res, 'issue details log entry', { issue: issue, text: text }));
+      });
+    }
+
+    to = to.toLowerCase().trim();
+    var aliases = settingsRepo.get('aliases');
+    if (aliases && aliases.entries) {
+      to = aliases.entries[to] || to;
+    }
+
+    var message = {
+      text: body.join('\n') + '\n',
+      to: to,
+      subject: '[issue] ' + issue.description + ((issue.tags && issue.tags.length) ?
+        (' #' + issue.tags.join(', #')) : '')
+    };
+    emailSender.send(message, function(err) {
+      if (err) {
+        self.send(res, 'issue send failed', { issue: issue, message: message, errorMessage: err.message });
+        return;
+      }
+      self.send(res, 'issue sent', { issue: issue, message: message });
+      repo.delete(issue);
+
+      if (toAlias) {
+        var aliases = settingsRepo.get('aliases') || { id: 'aliases' };
+        if (!aliases.entries) {
+          aliases.entries = {};
+        }
+        aliases.entries[toAlias.toLowerCase().trim()] = to;
+        settingsRepo.upsert(aliases);
+      }
+
+    });
+  });
+
   /* notifications */
 
   function currentTime() {
@@ -964,6 +1047,7 @@ module.exports = function(robot) {
       var issuesList = stringifyTags(issues.map(function(issue) {
         return issue.id.toString();
       }));
+      this.setRoomContext(res, 'issueid', issuesList[0].id);
       this.send(res, issues.length === 1 ?
         'issue waiting for your ' + (issues[0].state === 'fixed' ? 'verification' : 'fix') :
         'issues waiting for you', {

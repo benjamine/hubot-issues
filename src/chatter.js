@@ -230,7 +230,7 @@ Chatter.prototype.setRoomContext = function(message, name, value, duration) {
   return this.setContext({
     room: message.room,
     name: name,
-  }, value, duration || 30000);
+  }, value, duration || 12 * 3600000);
 };
 
 Chatter.prototype.deleteRoomContext = function(message, name) {
