@@ -1,6 +1,6 @@
 {
   "name": "hubot-issues",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "hubot issue tracker",
   "homepage": "https://github.com/benjamine/hubot-issues",
   "main": "./src/main",
