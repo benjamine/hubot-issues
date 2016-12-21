@@ -2,7 +2,7 @@
 
 hubot scripts for tracking issues
 
-See [`src/issues.js`](src/issues.js) for full documentation.
+See [`conversations.yaml`](https://github.com/benjamine/hubot-issues/blob/master/test/fixtures/conversations.yaml) for full documentation.
 
 ## Installation
 
